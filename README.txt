@@ -1,3 +1,6 @@
+Para rodar o projeto
+python run.py
+
 Para gerar os models direto da base de dados que criamos no servidor usar a linha de comando:
 
 pip install flask-sqlacodegen
