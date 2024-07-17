@@ -1,9 +1,8 @@
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify
+from . import team_blueprint
 from database import Session
 from model.models import *
 import json
-
-team_blueprint = Blueprint('team', __name__)
 
 @team_blueprint.route('/teams', methods=['GET'])
 def get_teams():

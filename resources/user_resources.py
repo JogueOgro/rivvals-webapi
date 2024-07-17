@@ -1,4 +1,6 @@
 from flask import request, jsonify, Blueprint
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from . import user_blueprint
 
 from model.models import *
 from database import Session
@@ -6,9 +8,8 @@ from datetime import datetime
 import bcrypt
 import json
 
-user_blueprint = Blueprint('user', __name__)
-
 @user_blueprint.route('/users', methods=['GET'])
+@jwt_required()
 def get_users():
     session = Session()
     users = session.query(User).all()
@@ -61,7 +62,8 @@ def check_password():
     password=data.get('password').encode("utf-8")
 
     if bcrypt.checkpw(password, hashed_password):
-        return jsonify(user.to_dict())
+        access_token = create_access_token(identity=email)
+        return jsonify(access_token=access_token), 200
 
     return jsonify({'message': 'Senha incorreta'}), 401
 

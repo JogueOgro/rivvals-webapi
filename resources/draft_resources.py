@@ -1,10 +1,10 @@
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify
+from . import draft_blueprint
 from database import Session
 from model.models import *
 from datetime import datetime
 import json
 
-draft_blueprint = Blueprint('draft', __name__)
 
 @draft_blueprint.route('/draft', methods=['GET'])
 def get_drafts():
