@@ -13,7 +13,7 @@ class Draft(Base):
     iddraft = Column(Integer, primary_key=True, nullable=False)
     player_idplayer = Column(ForeignKey('player.idplayer'), primary_key=True, nullable=False, index=True)
     team_idteam = Column(ForeignKey('team.idteam'), primary_key=True, nullable=False, index=True)
-    edicao = Column(String(45))
+    edition = Column(String(45))
     game = Column(String(45))
     draftdate = Column(DateTime)
     finaldate = Column(DateTime)
@@ -26,7 +26,7 @@ class Draft(Base):
             'iddraft': self.iddraft,
             'player_idplayer': self.player_idplayer,
             'team_idteam': self.team_idteam,
-            'edicao': self.edicao,
+            'edition': self.edition,
             'game': self.game,
             'draftdate': self.draftdate.isoformat() if self.draftdate else None,
             'finaldate': self.finaldate.isoformat() if self.finaldate else None,

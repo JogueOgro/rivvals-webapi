@@ -1,4 +1,5 @@
 from flask import request, jsonify
+from flask_jwt_extended import jwt_required
 from . import draft_blueprint
 from database import Session
 from model.models import *
@@ -7,12 +8,14 @@ import json
 
 
 @draft_blueprint.route('/draft', methods=['GET'])
+# @jwt_required()
 def get_drafts():
     session = Session()
     drafts = session.query(Draft).all()
     return jsonify([draft.to_dict() for draft in drafts])
 
 @draft_blueprint.route('/draft/<int:draft_id>', methods=['GET'])
+# @jwt_required()
 def get_draft_by_id(draft_id):
     session = Session()
     draft = session.query(Draft).filter_by(iddraft=draft_id).first()
@@ -21,11 +24,12 @@ def get_draft_by_id(draft_id):
     return jsonify(draft.to_dict())
 
 @draft_blueprint.route('/draft', methods=['POST'])
+# @jwt_required()
 def create_draft():
     data = request.json
     player_id = data.get('player_id')
     team_id = data.get('team_id')
-    edicao = data.get('edicao')
+    edicao = data.get('edition')
     game = data.get('game')
     draftdate = data.get('draftdate')
     finaldate = data.get('finaldate')
@@ -54,6 +58,7 @@ def create_draft():
         session.close()
 
 @draft_blueprint.route('/complete_draft', methods=['POST'])
+# @jwt_required()
 def create_complete_draft():
     session = Session()
     try:
@@ -128,6 +133,7 @@ def create_complete_draft():
         session.close()
 
 @draft_blueprint.route('/draft/<int:draft_id>', methods=['PUT'])
+@jwt_required()
 def update_draft(draft_id):
     session = Session()
     draft = session.query(Draft).filter_by(iddraft=draft_id).first()
@@ -154,6 +160,7 @@ def update_draft(draft_id):
         session.close()
 
 @draft_blueprint.route('/draft/<int:draft_id>', methods=['DELETE'])
+@jwt_required()
 def delete_draft(draft_id):
     session = Session()
     draft = session.query(Draft).filter_by(iddraft=draft_id).first()
