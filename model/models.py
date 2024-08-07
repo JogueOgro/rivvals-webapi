@@ -17,7 +17,7 @@ class Draft(Base):
     game = Column(String(45))
     draftdate = Column(DateTime)
     finaldate = Column(DateTime)
-    active = Column(TINYINT)
+    active = Column(Integer)
 
     player = relationship('Player')
     team = relationship('Team')
@@ -55,10 +55,10 @@ class Match(Base):
     format = Column(String(45))
     day = Column(String(45))
     hour = Column(String(45))
-    isDone = Column(TINYINT)
-    isScheduled = Column(TINYINT)
+    isDone = Column(Integer)
+    isScheduled = Column(Integer)
     score = Column(String(45))
-    freeSchedule = Column(LONGTEXT)
+    freeSchedule = Column(String(150))
 
     team = relationship('Team', primaryjoin='Match.team_idteam1 == Team.idteam')
     team1 = relationship('Team', primaryjoin='Match.team_idteam2 == Team.idteam')
@@ -88,13 +88,13 @@ class Player(Base):
     nick = Column(String(45))
     twitch = Column(String(45))
     email = Column(String(45))
-    schedule = Column(LONGTEXT)
+    schedule = Column(String(150))
     coins = Column(Integer)
     stars = Column(String(45))
     medal = Column(Integer)
     wins = Column(Integer)
     tags = Column(String(45))
-    photo = Column(LONGTEXT)
+    photo = Column(String(150))
     riot = Column(String(45))
     steam = Column(String(45))
     epic = Column(String(45))
@@ -119,17 +119,17 @@ class Player(Base):
             'medal': self.medal,
             'wins': self.wins,
             'tags': self.tags,
-            'photo': self.photo
-            'riot': self.riot
-            'steam': self.steam
-            'epic': self.epic
-            'xbox': self.xbox
-            'psn': self.psn
-            'score_cs': self.score_cs
-            'score_valorant': self.score_valorant
-            'score_lol': self.score_lol
-            'score_rocketleague': self.score_rocketleague
-            'score_fallguys': self.score_fallguys
+            'photo': self.photo,
+            'riot': self.riot,
+            'steam': self.steam,
+            'epic': self.epic,
+            'xbox': self.xbox,
+            'psn': self.psn,
+            'score_cs': self.score_cs,
+            'score_valorant': self.score_valorant,
+            'score_lol': self.score_lol,
+            'score_rocketleague': self.score_rocketleague,
+            'score_fallguys': self.score_fallguys,
         }
 
 
