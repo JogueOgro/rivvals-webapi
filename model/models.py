@@ -17,9 +17,10 @@ class Draft(Base):
     game = Column(String(45))
     draftdate = Column(DateTime)
     finaldate = Column(DateTime)
+    active = Column(TINYINT)
 
-    player = relationship('Player', primaryjoin='Draft.player_idplayer == Player.idplayer', backref='drafts')
-    team = relationship('Team', primaryjoin='Draft.team_idteam == Team.idteam', backref='drafts')
+    player = relationship('Player')
+    team = relationship('Team')
 
     def to_dict(self):
         return {
@@ -46,21 +47,37 @@ class Draft(Base):
 class Match(Base):
     __tablename__ = 'match'
 
-    idmatch = Column(Integer, primary_key=True)
-    datetime = Column(DateTime, nullable=False)
-    type = Column(String(45))
+    idmatch = Column(Integer, primary_key=True, nullable=False)
+    team_idteam1 = Column(ForeignKey('team.idteam'), primary_key=True, nullable=False, index=True)
+    team_idteam2 = Column(ForeignKey('team.idteam'), primary_key=True, nullable=False, index=True)
+    phase = Column(String(45))
+    group = Column(Integer)
+    format = Column(String(45))
+    day = Column(String(45))
+    hour = Column(String(45))
+    isDone = Column(TINYINT)
+    isScheduled = Column(TINYINT)
     score = Column(String(45))
+    freeSchedule = Column(LONGTEXT)
 
-    team = relationship('Team', secondary='match_has_team', backref='matches')
+    team = relationship('Team', primaryjoin='Match.team_idteam1 == Team.idteam')
+    team1 = relationship('Team', primaryjoin='Match.team_idteam2 == Team.idteam')
 
-
-
-t_match_has_team = Table(
-    'match_has_team', metadata,
-    Column('match_idmatch', ForeignKey('match.idmatch'), primary_key=True, nullable=False, index=True),
-    Column('team_idteam', ForeignKey('team.idteam'), primary_key=True, nullable=False, index=True)
-)
-
+    def to_dict(self):
+        return {
+            'idmatch': self.idmatch,
+            'team_idteam1': self.team_idteam1,
+            'team_idteam2': self.team_idteam2,
+            'phase': self.phase,
+            'group': self.group,
+            'format': self.format,
+            'day': self.day,
+            'hour': self.hour,
+            'isDone': self.isDone,
+            'isScheduled': self.isScheduled,
+            'score': self.score,
+            'freeSchedule': self.freeSchedule
+        }
 
 
 class Player(Base):
@@ -71,13 +88,23 @@ class Player(Base):
     nick = Column(String(45))
     twitch = Column(String(45))
     email = Column(String(45))
-    schedule = Column(String)
+    schedule = Column(LONGTEXT)
     coins = Column(Integer)
     stars = Column(String(45))
     medal = Column(Integer)
     wins = Column(Integer)
     tags = Column(String(45))
-    photo = Column(String)
+    photo = Column(LONGTEXT)
+    riot = Column(String(45))
+    steam = Column(String(45))
+    epic = Column(String(45))
+    xbox = Column(String(45))
+    psn = Column(String(45))
+    score_cs = Column(Integer)
+    score_valorant = Column(Integer)
+    score_lol = Column(Integer)
+    score_rocketleague = Column(Integer)
+    score_fallguys = Column(Integer)
 
     def to_dict(self):
         return {
@@ -93,6 +120,16 @@ class Player(Base):
             'wins': self.wins,
             'tags': self.tags,
             'photo': self.photo
+            'riot': self.riot
+            'steam': self.steam
+            'epic': self.epic
+            'xbox': self.xbox
+            'psn': self.psn
+            'score_cs': self.score_cs
+            'score_valorant': self.score_valorant
+            'score_lol': self.score_lol
+            'score_rocketleague': self.score_rocketleague
+            'score_fallguys': self.score_fallguys
         }
 
 

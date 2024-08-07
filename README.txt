@@ -3,9 +3,11 @@ python run.py
 
 Para gerar os models direto da base de dados que criamos no servidor usar a linha de comando:
 
+pip install sqlacodegen
+ou
 pip install flask-sqlacodegen
 em src/webapi rodar:
-sqlacodegen mysql://root:root@localhost:3306/rivvals > model/models_new.py
+sqlacodegen mysql://root:d3st_4ws@rivvals-dev.cpsu0go086lf.sa-east-1.rds.amazonaws.com:3306/rivvals-dev > model/models_new.py
 
 Criar arquivo de dependencias PIP:
 pip freeze > requirements.txt

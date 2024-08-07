@@ -109,7 +109,7 @@ def create_complete_draft():
                 session.add(team)
                 session.flush()
                 session.refresh(team)
-
+                
             # Se uma entrada no draft ja existe ligando player e time use, senão crie.
             edition = request.json['config']['edition']
             draft = session.query(Draft).filter_by(player_idplayer=new_player.idplayer, team_idteam=team.idteam).first()
@@ -117,12 +117,13 @@ def create_complete_draft():
                 draft = Draft(
                     player_idplayer = new_player.idplayer,
                     team_idteam = team.idteam,
-                    edicao = edition,
+                    edition = edition,
                     game = request.json['config']['game'],
                     draftdate =  datetime.now()
                 )
                 session.add(draft)
                 session.commit()
+        
 
         return jsonify({'message': 'Draft created successfully'}), 201
 
