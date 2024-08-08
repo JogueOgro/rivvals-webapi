@@ -14,6 +14,14 @@ def get_drafts():
     drafts = session.query(Draft).all()
     return jsonify([draft.to_dict() for draft in drafts])
 
+@draft_blueprint.route('/unique_drafts', methods=['GET'])
+# @jwt_required()
+def get_unique_drafts():
+    session = Session()
+    distinct_drafts = session.query(Draft.edition, Draft.game).distinct().all()
+    distinct_drafts_dict = [{'edition': edition, 'game': game} for edition, game in distinct_drafts]
+    return jsonify(distinct_drafts_dict)
+
 @draft_blueprint.route('/draft/<int:draft_id>', methods=['GET'])
 # @jwt_required()
 def get_draft_by_id(draft_id):
@@ -21,7 +29,16 @@ def get_draft_by_id(draft_id):
     draft = session.query(Draft).filter_by(iddraft=draft_id).first()
     if not draft:
         return jsonify({'message': 'Draft não encontrado'}), 404
-    return jsonify(draft.to_dict())
+    return draft.to_dict()
+
+@draft_blueprint.route('/draft_by_edition/<int:draft_edition>', methods=['GET'])
+# @jwt_required()
+def get_draft_by_edition(draft_edition):
+    session = Session()
+    drafts = session.query(Draft).filter_by(edition=draft_edition).all()
+    if not drafts:
+        return jsonify({'message': 'Draft não encontrado'}), 404
+    return jsonify([draft.to_dict() for draft in drafts])
 
 @draft_blueprint.route('/draft', methods=['POST'])
 # @jwt_required()
@@ -33,6 +50,9 @@ def create_draft():
     game = data.get('game')
     draftdate = data.get('draftdate')
     finaldate = data.get('finaldate')
+    import pdb;pdb.set_trace() # update
+    teamsQuantity = data.get('teamsQuantity')
+    playersPerTeam = data.get()
 
     try:
         new_draft = Draft(

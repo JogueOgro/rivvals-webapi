@@ -13,11 +13,15 @@ class Draft(Base):
     iddraft = Column(Integer, primary_key=True, nullable=False)
     player_idplayer = Column(ForeignKey('player.idplayer'), primary_key=True, nullable=False, index=True)
     team_idteam = Column(ForeignKey('team.idteam'), primary_key=True, nullable=False, index=True)
-    edition = Column(String(45))
-    game = Column(String(45))
+    edition = Column(String(45), nullable=False)
+    game = Column(String(45), nullable=False)
     draftdate = Column(DateTime)
     finaldate = Column(DateTime)
-    active = Column(Integer)
+    active = Column(Integer, nullable=False)
+    teamsQuantity = Column(Integer, nullable=False)
+    playersPerTeam = Column(Integer, nullable=False)
+    groupsQuantity = Column(Integer, nullable=False)
+    teamsPerGroup = Column(Integer, nullable=False)
 
     player = relationship('Player')
     team = relationship('Team')
@@ -31,17 +35,44 @@ class Draft(Base):
             'game': self.game,
             'draftdate': self.draftdate.isoformat() if self.draftdate else None,
             'finaldate': self.finaldate.isoformat() if self.finaldate else None,
+            'active': self.active,
+            'teamsQuantity': self.teamsQuantity,
+            'playersPerTeam': self.playersPerTeam,
+            'groupsQuantity': self.groupsQuantity,
+            'teamsPerGroup': self.teamsPerGroup,
             'player': {
                 'idplayer': self.player.idplayer,
-                'name': self.player.name  # Exemplo de como incluir campos do jogador
-                # Adicione mais campos do jogador conforme necessário
-            },
+                'name': self.player.name,
+                'nick': self.player.nick,
+                'twitch': self.player.twitch,
+                'email': self.player.email,
+                'schedule': self.player.schedule,
+                'coins': self.player.coins,
+                'stars': self.player.stars,
+                'medal': self.player.medal,
+                'wins': self.player.wins,
+                'tags': self.player.tags,
+                'photo': self.player.photo,
+                'riot': self.player.riot,
+                'steam': self.player.steam,
+                'epic': self.player.epic,
+                'xbox': self.player.xbox,
+                'psn': self.player.psn,
+                'score_cs': self.player.score_cs,
+                'score_valorant': self.player.score_valorant,
+                'score_lol': self.player.score_lol,
+                'score_rocketleague': self.player.score_rocketleague,
+                'score_fallguys': self.player.score_fallguys,
+                },
             'team': {
                 'idteam': self.team.idteam,
-                'name': self.team.name  # Exemplo de como incluir campos da equipe
-                # Adicione mais campos da equipe conforme necessário
+                'name': self.team.name,
+                'logo': self.team.logo,
+                'wins': self.team.wins,
+                'number': self.team.number,
+                'group': self.team.group
+                }
             }
-        }
 
 
 class Match(Base):
