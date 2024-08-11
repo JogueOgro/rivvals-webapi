@@ -53,6 +53,7 @@ class Draft(Base):
                 'wins': self.player.wins,
                 'tags': self.player.tags,
                 'photo': self.player.photo,
+                'isCaptain': self.player.isCaptain,
                 'riot': self.player.riot,
                 'steam': self.player.steam,
                 'epic': self.player.epic,
@@ -126,6 +127,7 @@ class Player(Base):
     wins = Column(Integer)
     tags = Column(String(45))
     photo = Column(String(150))
+    isCaptain = Column(Integer)
     riot = Column(String(45))
     steam = Column(String(45))
     epic = Column(String(45))
