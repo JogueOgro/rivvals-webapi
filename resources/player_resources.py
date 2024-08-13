@@ -14,7 +14,7 @@ def get_players():
 
 @player_blueprint.route('/player/<int:idplayer>', methods=['GET'])
 # @jwt_required()
-def get_playe_by_id(idplayer):
+def get_player_by_id(idplayer):
     session = Session()
     player = session.query(Player).filter_by(idplayer=idplayer).first()
     if player:
