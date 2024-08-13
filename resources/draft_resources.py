@@ -29,14 +29,23 @@ def get_draft_by_id(draft_id):
         return jsonify({'message': 'Draft não encontrado'}), 404
     return draft.to_dict()
 
-@draft_blueprint.route('/draft_by_edition/<int:draft_edition>', methods=['GET'])
+@draft_blueprint.route('/drafts_by_edition/<int:draft_edition>', methods=['GET'])
 # @jwt_required()
-def get_draft_by_edition(draft_edition):
+def get_drafts_by_edition(draft_edition):
     session = Session()
     drafts = session.query(Draft).filter_by(edition=draft_edition).all()
     if not drafts:
         return jsonify({'message': 'Draft não encontrado'}), 404
     return jsonify([draft.to_dict() for draft in drafts])
+
+@draft_blueprint.route('/draft_by_edition/<int:draft_edition>', methods=['GET'])
+# @jwt_required()
+def get_draft_by_edition(draft_edition):
+    session = Session()
+    draft = session.query(Draft).filter_by(edition=draft_edition).first()
+    if not draft:
+        return jsonify({'message': 'Draft não encontrado'}), 404
+    return draft.to_dict
 
 @draft_blueprint.route('/draft', methods=['POST'])
 # @jwt_required()
@@ -150,8 +159,16 @@ def create_complete_draft():
                     
                 # Se uma entrada no draft ja existe ligando player e time use, senão crie.
                 edition = request.json['config']['edition']
-                draft = session.query(Draft).filter_by(player_idplayer=new_player.idplayer, team_idteam=team.idteam, edition=edition).first()
-                if not draft:
+                draft = session.query(Draft).filter_by(player_idplayer=new_player.idplayer, team_idteam=team.idteam).first()
+                if draft:
+                    draft.player_idplayer = new_player.get('idplayer')
+                    draft.team_idteam = team.get('idteam')
+                    draft.edition = edition
+                    draft.game = request.json['config']['game']
+                    draft.teamsQuantity = request.json['config']['teamsQuantity']
+                    draft.playersPerTeam = request.json['config']['teamPlayersQuantity']
+                    draft.draftdate = datetime.now()
+                else:
                     draft = Draft(
                         player_idplayer = new_player.idplayer,
                         team_idteam = team.idteam,
@@ -167,7 +184,6 @@ def create_complete_draft():
             return jsonify({'message': 'Draft created successfully'}), 201
 
         except Exception as e:
-            logger.error(f"Exception occurred: {e}")
             session.rollback()
             return jsonify({'error': str(e)}), 500
         finally:
