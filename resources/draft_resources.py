@@ -5,7 +5,7 @@ from database import Session
 from model.models import *
 from datetime import datetime
 
-@draft_blueprint.route('/draft', methods=['GET'])
+@draft_blueprint.route('/drafts', methods=['GET'])
 # @jwt_required()
 def get_drafts():
     session = Session()

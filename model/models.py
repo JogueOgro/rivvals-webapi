@@ -164,7 +164,6 @@ class Player(Base):
             'score_lol': self.score_lol,
             'score_rocketleague': self.score_rocketleague,
             'score_fallguys': self.score_fallguys,
-            'inEditions': self.inEditions
         }
 
 
