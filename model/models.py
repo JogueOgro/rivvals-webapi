@@ -12,16 +12,16 @@ class Draft(Base):
 
     iddraft = Column(Integer, primary_key=True, nullable=False)
     player_idplayer = Column(ForeignKey('player.idplayer'), primary_key=True, nullable=False, index=True)
-    team_idteam = Column(ForeignKey('team.idteam'), primary_key=True, nullable=False, index=True)
+    team_idteam = Column(ForeignKey('team.idteam'), primary_key=True, nullable=True, index=True)
     edition = Column(String(45), nullable=False)
     game = Column(String(45), nullable=False)
     draftdate = Column(DateTime)
     finaldate = Column(DateTime)
-    active = Column(Integer, nullable=False)
-    teamsQuantity = Column(Integer, nullable=False)
-    playersPerTeam = Column(Integer, nullable=False)
-    groupsQuantity = Column(Integer, nullable=False)
-    teamsPerGroup = Column(Integer, nullable=False)
+    teamsQuantity = Column(Integer)
+    playersPerTeam = Column(Integer)
+    groupsQuantity = Column(Integer)
+    teamsPerGroup = Column(Integer)
+    isActive = Column(Integer)
 
     player = relationship('Player')
     team = relationship('Team')
@@ -35,11 +35,11 @@ class Draft(Base):
             'game': self.game,
             'draftdate': self.draftdate.isoformat() if self.draftdate else None,
             'finaldate': self.finaldate.isoformat() if self.finaldate else None,
-            'active': self.active,
             'teamsQuantity': self.teamsQuantity,
             'playersPerTeam': self.playersPerTeam,
             'groupsQuantity': self.groupsQuantity,
             'teamsPerGroup': self.teamsPerGroup,
+            'isActive': self.isActive,
             'player': {
                 'idplayer': self.player.idplayer,
                 'name': self.player.name,
@@ -128,6 +128,7 @@ class Player(Base):
     tags = Column(String(45))
     photo = Column(String(150))
     isCaptain = Column(Integer)
+    isBackup = Column(Integer)
     riot = Column(String(45))
     steam = Column(String(45))
     epic = Column(String(45))
@@ -163,6 +164,7 @@ class Player(Base):
             'score_lol': self.score_lol,
             'score_rocketleague': self.score_rocketleague,
             'score_fallguys': self.score_fallguys,
+            'inEditions': self.inEditions
         }
 
 

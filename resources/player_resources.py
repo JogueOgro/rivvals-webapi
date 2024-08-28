@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required
 from . import player_blueprint
 from model.models import *
 from database import Session
-import json
+from datetime import datetime
 
 @player_blueprint.route('/players', methods=['GET'])
 # @jwt_required()
@@ -39,7 +39,18 @@ def create_player():
         medal=data.get('medal'),
         wins=data.get('wins'),
         tags=data.get('tags'),
-        photo=data.get('photo')
+        isCaptain=data.get('isCaptain'),
+        isBackup=data.get('isBackup'),
+        riot=data.get('riot'),
+        steam=data.get('steam'),
+        epic=data.get('epic'),
+        xbox=data.get('xbox'),
+        psn=data.get('psn'),
+        score_cs=data.get('score_cs'),
+        score_valorant=data.get('score_valorant'),
+        score_lol = data.get('score_lol'),
+        score_rocketleague = data.get('score_rocketleague'),
+        score_fallguys = data.get('score_fallguys'),
     )
 
     session = Session()
@@ -54,6 +65,66 @@ def create_player():
     finally:
         session.close()
 
+@player_blueprint.route('/subscribe_player', methods=['POST'])
+# @jwt_required()
+def subscribe_player():
+
+    player = request.json['player'] 
+    config = request.json['config']
+
+    session = Session()
+    existing_player = session.query(Player).filter_by(email=player.get('email')).first()
+    if existing_player:
+        new_player = existing_player
+        existing_draft = session.query(Draft).filter_by(edition=config.get('edition'), player_idplayer=existing_player.idplayer).first()
+        if existing_draft:
+            return jsonify({'message': 'Player já registrado neste draft'}), 406
+    else:
+        new_player = Player(
+        name=player.get('name'),
+        nick=player.get('nick'),
+        twitch=player.get('twitch'),
+        email=player.get('email'),
+        schedule=player.get('schedule'),
+        coins=player.get('coins'),
+        stars=player.get('stars'),
+        medal=player.get('medal'),
+        wins=player.get('wins'),
+        tags=player.get('tags'),
+        isCaptain=player.get('isCaptain'),
+        isBackup=player.get('isBackup'),
+        riot=player.get('riot'),
+        steam=player.get('steam'),
+        epic=player.get('epic'),
+        xbox=player.get('xbox'),
+        psn=player.get('psn'),
+        score_cs=player.get('score_cs'),
+        score_valorant=player.get('score_valorant'),
+        score_lol = player.get('score_lol'),
+        score_rocketleague = player.get('score_rocketleague'),
+        score_fallguys = player.get('score_fallguys'),
+    )
+        session.add(new_player)
+        session.flush()
+        session.refresh(new_player)
+
+    draft = Draft(
+    player_idplayer = new_player.idplayer,
+    edition = config.get('edition'),
+    game = config.get('game'),
+    draftdate =  datetime.now(),
+    isActive = 1,
+    )
+    
+    try:
+        session.add(draft)
+        session.commit()
+        return new_player.to_dict()
+    except Exception as e:
+        session.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        session.close()
 
 @player_blueprint.route('/player/<int:idplayer>', methods=['PUT'])
 # @jwt_required()

@@ -14,3 +14,9 @@ pip freeze > requirements.txt
 
 Instalar dependencias com PIP:
 pip install -r requirements.txt
+
+No deploy para instalar o Mysql e libs consulte: https://dev.to/aws-builders/installing-mysql-on-amazon-linux-2023-1512 e tambem instale:
+sudo yum install mysql-devel
+sudo yum install gcc python3-devel
+sudo yum install mariadb-connector-c-devel
+ou para Ubuntu, o comando: sudo apt-get install pkg-config python3-dev default-libmysqlclient-dev build-essential

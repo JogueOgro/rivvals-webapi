@@ -5,10 +5,6 @@ from database import Session
 from model.models import *
 from datetime import datetime
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-logging.getLogger('sqlalchemy.pool').setLevel(logging.DEBUG)
-
 
 @draft_blueprint.route('/draft', methods=['GET'])
 # @jwt_required()
