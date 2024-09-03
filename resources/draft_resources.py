@@ -20,6 +20,14 @@ def get_unique_drafts():
     distinct_drafts_dict = [{'edition': edition, 'game': game} for edition, game in distinct_drafts]
     return jsonify(distinct_drafts_dict)
 
+@draft_blueprint.route('/unique_active_drafts', methods=['GET'])
+# @jwt_required()
+def get_unique_active_drafts():
+    session = Session()
+    distinct_drafts = session.query(Draft.edition, Draft.game).filter(Draft.isActive == 0).distinct().all()
+    distinct_drafts_dict = [{'edition': edition, 'game': game} for edition, game in distinct_drafts]
+    return jsonify(distinct_drafts_dict)
+
 @draft_blueprint.route('/draft/<int:draft_id>', methods=['GET'])
 # @jwt_required()
 def get_draft_by_id(draft_id):
@@ -168,6 +176,7 @@ def create_complete_draft():
                     draft.teamsQuantity = request.json['config']['teamsQuantity']
                     draft.playersPerTeam = request.json['config']['teamPlayersQuantity']
                     draft.draftdate = datetime.now()
+                    draft.isActive = 0
                 else:
                     draft = Draft(
                         player_idplayer = new_player.idplayer,
@@ -176,7 +185,8 @@ def create_complete_draft():
                         game = request.json['config']['game'],
                         teamsQuantity =  request.json['config']['teamsQuantity'],
                         playersPerTeam = request.json['config']['teamPlayersQuantity'],
-                        draftdate =  datetime.now()
+                        draftdate =  datetime.now(),
+                        isActive = 0
                     )
                     session.add(draft)
 

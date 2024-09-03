@@ -27,7 +27,56 @@ class Draft(Base):
     team = relationship('Team')
 
     def to_dict(self):
-        return {
+        if self.team:
+            return {
+                'iddraft': self.iddraft,
+                'player_idplayer': self.player_idplayer,
+                'team_idteam': self.team_idteam,
+                'edition': self.edition,
+                'game': self.game,
+                'draftdate': self.draftdate.isoformat() if self.draftdate else None,
+                'finaldate': self.finaldate.isoformat() if self.finaldate else None,
+                'teamsQuantity': self.teamsQuantity,
+                'playersPerTeam': self.playersPerTeam,
+                'groupsQuantity': self.groupsQuantity,
+                'teamsPerGroup': self.teamsPerGroup,
+                'isActive': self.isActive,
+                'player': {
+                    'idplayer': self.player.idplayer,
+                    'name': self.player.name,
+                    'nick': self.player.nick,
+                    'twitch': self.player.twitch,
+                    'email': self.player.email,
+                    'schedule': self.player.schedule,
+                    'coins': self.player.coins,
+                    'stars': self.player.stars,
+                    'medal': self.player.medal,
+                    'wins': self.player.wins,
+                    'tags': self.player.tags,
+                    'photo': self.player.photo,
+                    'isCaptain': self.player.isCaptain,
+                    'riot': self.player.riot,
+                    'steam': self.player.steam,
+                    'epic': self.player.epic,
+                    'xbox': self.player.xbox,
+                    'psn': self.player.psn,
+                    'score_cs': self.player.score_cs,
+                    'score_valorant': self.player.score_valorant,
+                    'score_lol': self.player.score_lol,
+                    'score_rocketleague': self.player.score_rocketleague,
+                    'score_fallguys': self.player.score_fallguys,
+                    },
+                    'team': {
+                    'idteam': self.team.idteam,
+                    'name': self.team.name,
+                    'logo': self.team.logo,
+                    'wins': self.team.wins,
+                    'number': self.team.number,
+                    'group': self.team.group
+                    }
+                }
+        else:
+            return {
             'iddraft': self.iddraft,
             'player_idplayer': self.player_idplayer,
             'team_idteam': self.team_idteam,
@@ -64,7 +113,7 @@ class Draft(Base):
                 'score_lol': self.player.score_lol,
                 'score_rocketleague': self.player.score_rocketleague,
                 'score_fallguys': self.player.score_fallguys,
-                }
+                },
             }
 
 
