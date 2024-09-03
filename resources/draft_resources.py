@@ -45,7 +45,7 @@ def get_draft_by_edition(draft_edition):
     draft = session.query(Draft).filter_by(edition=draft_edition).first()
     if not draft:
         return jsonify({'message': 'Draft não encontrado'}), 404
-    return draft.to_dict
+    return draft.to_dict()
 
 @draft_blueprint.route('/draft', methods=['POST'])
 # @jwt_required()

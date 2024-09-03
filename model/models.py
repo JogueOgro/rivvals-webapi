@@ -64,14 +64,6 @@ class Draft(Base):
                 'score_lol': self.player.score_lol,
                 'score_rocketleague': self.player.score_rocketleague,
                 'score_fallguys': self.player.score_fallguys,
-                },
-            'team': {
-                'idteam': self.team.idteam,
-                'name': self.team.name,
-                'logo': self.team.logo,
-                'wins': self.team.wins,
-                'number': self.team.number,
-                'group': self.team.group
                 }
             }
 
