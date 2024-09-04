@@ -20,11 +20,19 @@ def get_unique_drafts():
     distinct_drafts_dict = [{'edition': edition, 'game': game} for edition, game in distinct_drafts]
     return jsonify(distinct_drafts_dict)
 
+@draft_blueprint.route('/unique_completed_drafts', methods=['GET'])
+# @jwt_required()
+def get_unique_completed_drafts():
+    session = Session()
+    distinct_drafts = session.query(Draft.edition, Draft.game).filter(Draft.isActive == 0).distinct().all()
+    distinct_drafts_dict = [{'edition': edition, 'game': game} for edition, game in distinct_drafts]
+    return jsonify(distinct_drafts_dict)
+
 @draft_blueprint.route('/unique_active_drafts', methods=['GET'])
 # @jwt_required()
 def get_unique_active_drafts():
     session = Session()
-    distinct_drafts = session.query(Draft.edition, Draft.game).filter(Draft.isActive == 0).distinct().all()
+    distinct_drafts = session.query(Draft.edition, Draft.game).filter(Draft.isActive == 1).distinct().all()
     distinct_drafts_dict = [{'edition': edition, 'game': game} for edition, game in distinct_drafts]
     return jsonify(distinct_drafts_dict)
 
@@ -90,6 +98,98 @@ def create_draft():
 
     finally:
         session.close()
+
+@draft_blueprint.route('/new_draft', methods=['POST'])
+# @jwt_required()
+def new_draft():
+    with Session() as session:
+        try:
+            players = request.json['players']
+            for player in players:
+                new_player = session.query(Player).filter_by(name=player['name']).first()
+                if new_player:
+                    # Se o jogador já existir, atualize seus atributos
+                    new_player.nick = player.get('nick')
+                    new_player.twitch = player.get('twitch')
+                    new_player.email = player.get('email')
+                    new_player.schedule = str(player.get('schedule'))
+                    new_player.coins = player.get('coins')
+                    new_player.stars = player.get('stars')
+                    new_player.medal = player.get('medal')
+                    new_player.wins = player.get('wins')
+                    new_player.tags = player.get('tags')
+                    new_player.isCaptain = player.get('isCaptain')
+                    new_player.riot = player.get('riot')
+                    new_player.steam = player.get('steam')
+                    new_player.epic = player.get('epic')
+                    new_player.xbox = player.get('xbox')
+                    new_player.psn = player.get('psn')
+                    new_player.score_cs = player.get('score_cs')
+                    new_player.score_valorant = player.get('score_valorant')
+                    new_player.score_lol = player.get('score_lol')
+                    new_player.score_rocketleague = player.get('score_rocketleague')
+                    new_player.score_fallguys = player.get('score_fallguys')
+                else:
+                    # Se o jogador não existir, crie um novo jogador
+                    new_player = Player(
+                        name = player.get('name'),
+                        nick = player.get('nick'),
+                        twitch = player.get('twitch'),
+                        email = player.get('email'),
+                        schedule = str(player.get('schedule')),
+                        coins = player.get('coins', 0),
+                        stars = player.get('stars'),
+                        medal = player.get('medal'),
+                        wins = player.get('wins'),
+                        tags = player.get('tags'),
+                        photo = player.get('photo'),
+                        isCaptain = player.get('isCaptain', 0),
+                        riot = player.get('riot'),
+                        steam = player.get('steam'),
+                        epic = player.get('epic'),
+                        xbox = player.get('xbox'),
+                        psn = player.get('psn'),
+                        score_cs = player.get('score_cs'),
+                        score_valorant = player.get('score_valorant'),
+                        score_lol = player.get('score_lol'),
+                        score_rocketleague = player.get('score_rocketleague'),
+                        score_fallguys = player.get('score_fallguys'),
+                    )
+                session.add(new_player)
+                session.flush()
+                session.refresh(new_player)
+                    
+                # Se uma entrada no draft ja existe ligando player e edição use, senão crie.
+                edition = request.json['config']['edition']
+                draft = session.query(Draft).filter_by(player_idplayer=new_player.idplayer, edition=edition).first()
+                if draft:
+                    draft.player_idplayer = new_player.get('idplayer')
+                    draft.edition = edition
+                    draft.game = request.json['config']['game']
+                    draft.teamsQuantity = request.json['config']['teamsQuantity']
+                    draft.playersPerTeam = request.json['config']['teamPlayersQuantity']
+                    draft.draftdate = datetime.now()
+                    draft.isActive = 1
+                else:
+                    draft = Draft(
+                        player_idplayer = new_player.idplayer,
+                        edition = edition,
+                        game = request.json['config']['game'],
+                        teamsQuantity =  request.json['config']['teamsQuantity'],
+                        playersPerTeam = request.json['config']['teamPlayersQuantity'],
+                        draftdate =  datetime.now(),
+                        isActive = 1
+                    )
+                    session.add(draft)
+
+            session.commit()
+            return jsonify({'message': 'Draft created successfully'}), 201
+
+        except Exception as e:
+            session.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            session.close()
 
 @draft_blueprint.route('/complete_draft', methods=['POST'])
 # @jwt_required()
