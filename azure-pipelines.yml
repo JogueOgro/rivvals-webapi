@@ -1,0 +1,49 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+
+  - stage: Build
+    jobs:
+      - job: Build
+        displayName: 'Build & Push'
+        steps:
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'sc_rivvals_draft'
+              repository: 'rivvals-webapi'
+              command: 'buildAndPush'
+              Dockerfile: '.'
+              tags: |
+                $(Build.BuildId)
+                latest
+
+  - stage: Deploy
+    jobs:
+      - job: Deploy
+        displayName: 'Deploy to WebApp'
+        steps:
+          - task: AzureRmWebAppDeployment@4
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'Levva(cd590d29-7f19-473d-bb90-89f4b04b3a0a)'
+              appType: 'webAppContainer'
+              WebAppName: 'levaseue2rivvalsapip'
+              DockerNamespace: 'levcrue2rivvalsp.azurecr.io'
+              DockerRepository: 'rivvals-webapi'
+              DockerImageTag: '$(Build.BuildId)'
+
+          - task: AzureAppServiceManage@0
+            inputs:
+              azureSubscription: 'Levva(cd590d29-7f19-473d-bb90-89f4b04b3a0a)'
+              Action: 'Stop Azure App Service'
+              WebAppName: 'levaseue2rivvalsapip'
+
+          - task: AzureAppServiceManage@0
+            inputs:
+              azureSubscription: 'Levva(cd590d29-7f19-473d-bb90-89f4b04b3a0a)'
+              Action: 'Start Azure App Service'
+              WebAppName: 'levaseue2rivvalsapip'
