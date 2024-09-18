@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required
 from . import util_blueprint
 from database import Session
 from model.models import *
-from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
+# from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import json

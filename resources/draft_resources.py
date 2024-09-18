@@ -4,6 +4,11 @@ from . import draft_blueprint
 from database import Session
 from model.models import *
 from datetime import datetime
+# import logging
+
+# # Ativar o logging do SQLAlchemyn
+# logging.basicConfig()
+# logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
 
 @draft_blueprint.route('/drafts', methods=['GET'])
 # @jwt_required()
@@ -106,7 +111,7 @@ def new_draft():
         try:
             players = request.json['players']
             for player in players:
-                new_player = session.query(Player).filter_by(name=player['name']).first()
+                new_player = session.query(Player).filter_by(name=player.get('name')).first()
                 if new_player:
                     # Se o jogador já existir, atualize seus atributos
                     new_player.nick = player.get('nick')
@@ -163,7 +168,7 @@ def new_draft():
                 edition = request.json['config']['edition']
                 draft = session.query(Draft).filter_by(player_idplayer=new_player.idplayer, edition=edition).first()
                 if draft:
-                    draft.player_idplayer = new_player.get('idplayer')
+                    draft.player_idplayer = new_player.idplayer
                     draft.edition = edition
                     draft.game = request.json['config']['game']
                     draft.teamsQuantity = request.json['config']['teamsQuantity']
@@ -198,7 +203,7 @@ def create_complete_draft():
         try:
             players = request.json['players']
             for player in players:
-                new_player = session.query(Player).filter_by(name=player['name']).first()
+                new_player = session.query(Player).filter_by(name=player.get('name')).first()
                 if new_player:
                     # Se o jogador já existir, atualize seus atributos
                     new_player.nick = player.get('nick')
@@ -269,8 +274,8 @@ def create_complete_draft():
                 edition = request.json['config']['edition']
                 draft = session.query(Draft).filter_by(player_idplayer=new_player.idplayer, team_idteam=team.idteam).first()
                 if draft:
-                    draft.player_idplayer = new_player.get('idplayer')
-                    draft.team_idteam = team.get('idteam')
+                    draft.player_idplayer = new_player.idplayer
+                    draft.team_idteam = team.idteam
                     draft.edition = edition
                     draft.game = request.json['config']['game']
                     draft.teamsQuantity = request.json['config']['teamsQuantity']
