@@ -1,6 +1,9 @@
 trigger:
 - main
 
+variables:
+  - group: variables-rivvals-draft
+
 pool:
   vmImage: ubuntu-latest
 
@@ -16,7 +19,7 @@ stages:
               containerRegistry: 'sc_rivvals_draft'
               repository: 'rivvals-webapi'
               command: 'buildAndPush'
-              Dockerfile: Dockerfile
+              Dockerfile: 'Dockerfile'
               tags: |
                 $(Build.BuildId)
                 latest
@@ -35,6 +38,11 @@ stages:
               DockerNamespace: 'levcrue2rivvalsp.azurecr.io'
               DockerRepository: 'rivvals-webapi'
               DockerImageTag: '$(Build.BuildId)'
+            env:
+              DB_PATH: '$(DB_PATH)'
+              AZURE_STORAGE_CONNECTION_STRING: '$(AZURE_STORAGE_CONNECTION_STRING)'
+              AZURE_STORAGE_ACCOUNT_NAME: '$(AZURE_STORAGE_ACCOUNT_NAME)'
+              AZURE_STORAGE_ACCOUNT_KEY: '$(AZURE_STORAGE_ACCOUNT_KEY)'
 
           - task: AzureAppServiceManage@0
             inputs:
