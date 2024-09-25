@@ -38,11 +38,21 @@ stages:
               DockerNamespace: 'levcrue2rivvalsp.azurecr.io'
               DockerRepository: 'rivvals-webapi'
               DockerImageTag: '$(Build.BuildId)'
-            env:
-              DB_PATH: '$(DB_PATH)'
-              AZURE_STORAGE_CONNECTION_STRING: '$(AZURE_STORAGE_CONNECTION_STRING)'
-              AZURE_STORAGE_ACCOUNT_NAME: '$(AZURE_STORAGE_ACCOUNT_NAME)'
-              AZURE_STORAGE_ACCOUNT_KEY: '$(AZURE_STORAGE_ACCOUNT_KEY)'
+
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'Levva(cd590d29-7f19-473d-bb90-89f4b04b3a0a)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az webapp config appsettings set \
+                --resource-group levrgue2rivvalsp \
+                --name levaseue2rivvalsapip \
+                --settings \
+                DB_PATH=$(DB_PATH) \
+                AZURE_STORAGE_CONNECTION_STRING=$(AZURE_STORAGE_CONNECTION_STRING) \
+                AZURE_STORAGE_ACCOUNT_NAME=$(AZURE_STORAGE_ACCOUNT_NAME) \
+                AZURE_STORAGE_ACCOUNT_KEY=$(AZURE_STORAGE_ACCOUNT_KEY)
 
           - task: AzureAppServiceManage@0
             inputs:
