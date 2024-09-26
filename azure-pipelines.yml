@@ -10,8 +10,8 @@ pool:
 stages:
   - stage: CI
     jobs:
-      - job: Update_env
-        displayName: "Update .env"
+      - job: Build
+        displayName: 'Build & Push'
         steps:
           - task: Bash@3
             displayName: Replace - env
@@ -26,9 +26,6 @@ stages:
               AZURE_STORAGE_ACCOUNT_NAME: $(AZURE_STORAGE_ACCOUNT_NAME)
               AZURE_STORAGE_ACCOUNT_KEY: $(AZURE_STORAGE_ACCOUNT_KEY)
 
-      - job: Build
-        displayName: 'Build & Push'
-        steps:
           - task: Docker@2
             inputs:
               containerRegistry: 'sc_rivvals_draft'
