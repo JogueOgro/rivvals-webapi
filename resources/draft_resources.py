@@ -272,7 +272,7 @@ def create_complete_draft():
                     
                 # Se uma entrada no draft ja existe ligando player e time use, senão crie.
                 edition = request.json['config']['edition']
-                draft = session.query(Draft).filter_by(player_idplayer=new_player.idplayer, team_idteam=team.idteam).first()
+                draft = session.query(Draft).filter_by(player_idplayer=new_player.idplayer, team_idteam=team.idteam, edition=edition).first()
                 if draft:
                     draft.player_idplayer = new_player.idplayer
                     draft.team_idteam = team.idteam
