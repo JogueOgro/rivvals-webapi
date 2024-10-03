@@ -1,31 +1,55 @@
 trigger:
 - main
 
+variables:
+  - group: variables-rivvals-draft
+
 pool:
   vmImage: ubuntu-latest
 
 stages:
-
-  - stage: Build
+  - stage: CI
     jobs:
       - job: Build
         displayName: 'Build & Push'
         steps:
+          - task: Bash@3
+            displayName: Replace - env
+            inputs:
+              targetType: "inline"
+              script: |
+                mv .env .env-rplc
+                envsubst < .env-rplc > .env
+            env:
+              DB_PATH: $(DB_PATH)
+              AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
+              AZURE_STORAGE_ACCOUNT_NAME: $(AZURE_STORAGE_ACCOUNT_NAME)
+              AZURE_STORAGE_ACCOUNT_KEY: $(AZURE_STORAGE_ACCOUNT_KEY)
+              JWT_SECRET_KEY: $(JWT_SECRET_KEY)
+
           - task: Docker@2
             inputs:
               containerRegistry: 'sc_rivvals_draft'
               repository: 'rivvals-webapi'
               command: 'buildAndPush'
-              Dockerfile: '.'
+              Dockerfile: 'Dockerfile'
               tags: |
                 $(Build.BuildId)
                 latest
 
-  - stage: Deploy
+  - stage: CD
     jobs:
       - job: Deploy
         displayName: 'Deploy to WebApp'
         steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'Levva(cd590d29-7f19-473d-bb90-89f4b04b3a0a)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az webapp update --name levaseue2rivvalsapip --resource-group levrgue2rivvalsp --set publicNetworkAccess=Enabled
+
           - task: AzureRmWebAppDeployment@4
             inputs:
               ConnectionType: 'AzureRM'
@@ -47,3 +71,11 @@ stages:
               azureSubscription: 'Levva(cd590d29-7f19-473d-bb90-89f4b04b3a0a)'
               Action: 'Start Azure App Service'
               WebAppName: 'levaseue2rivvalsapip'
+
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'Levva(cd590d29-7f19-473d-bb90-89f4b04b3a0a)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az webapp update --name levaseue2rivvalsapip --resource-group levrgue2rivvalsp --set publicNetworkAccess=Disabled
