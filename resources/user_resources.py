@@ -27,7 +27,6 @@ def get_user_by_id(user_id):
     return user.to_dict()
 
 @user_blueprint.route('/user', methods=['POST'])
-@jwt_required()
 def create_user():
 
     data = request.json
