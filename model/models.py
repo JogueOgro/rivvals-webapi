@@ -237,6 +237,7 @@ class User(Base):
     email = Column(String(45))
     password = Column(String(45))
     creation_date = Column(DateTime)
+    auth = Column(String(45))
 
     def to_dict(self):
       return {
@@ -244,6 +245,7 @@ class User(Base):
           'name': self.name,
           'email': self.email,
           'password': self.password,  # Note: You might want to exclude this for security reasons
-          'creation_date': self.creation_date
+          'creation_date': self.creation_date,
+          'auth': self.auth
       }
 

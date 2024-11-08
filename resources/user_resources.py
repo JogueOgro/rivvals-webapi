@@ -68,6 +68,21 @@ def check_password():
 
     return jsonify({'message': 'Senha incorreta'}), 401
 
+@user_blueprint.route('/checkauth', methods=['POST'])
+def check_auth():
+
+    data = request.json
+    session = Session()
+    email=data.get('email')
+    auth=data.get('auth')
+    user = session.query(User).filter_by(email=email, auth=auth).first()
+
+    if not user:
+        session.close()
+        return jsonify({'message': 'Não autorizado'}), 401
+
+    return { 'isAuthorized': True }
+
 @user_blueprint.route('/user/<int:user_id>', methods=['PUT'])
 @jwt_required()
 def update_user(user_id):
