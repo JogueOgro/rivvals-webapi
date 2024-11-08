@@ -63,8 +63,8 @@ def check_password():
     password=data.get('password').encode("utf-8")
 
     if bcrypt.checkpw(password, hashed_password):
-        access_token = create_access_token(identity=email)
-        return jsonify(access_token=access_token), 200
+        token = create_access_token(identity=email)
+        return jsonify(token=token), 200
 
     return jsonify({'message': 'Senha incorreta'}), 401
 

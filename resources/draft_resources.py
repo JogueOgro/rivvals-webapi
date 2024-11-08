@@ -11,14 +11,14 @@ from datetime import datetime
 # logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
 
 @draft_blueprint.route('/drafts', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_drafts():
     session = Session()
     drafts = session.query(Draft).all()
     return jsonify([draft.to_dict() for draft in drafts])
 
 @draft_blueprint.route('/unique_drafts', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_unique_drafts():
     session = Session()
     distinct_drafts = session.query(Draft.edition, Draft.game).distinct().all()
@@ -26,7 +26,7 @@ def get_unique_drafts():
     return jsonify(distinct_drafts_dict)
 
 @draft_blueprint.route('/unique_completed_drafts', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_unique_completed_drafts():
     session = Session()
     distinct_drafts = session.query(Draft.edition, Draft.game).filter(Draft.isActive == 0).distinct().all()
@@ -34,7 +34,7 @@ def get_unique_completed_drafts():
     return jsonify(distinct_drafts_dict)
 
 @draft_blueprint.route('/unique_active_drafts', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_unique_active_drafts():
     session = Session()
     distinct_drafts = session.query(Draft.edition, Draft.game).filter(Draft.isActive == 1).distinct().all()
@@ -42,7 +42,7 @@ def get_unique_active_drafts():
     return jsonify(distinct_drafts_dict)
 
 @draft_blueprint.route('/draft/<int:draft_id>', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_draft_by_id(draft_id):
     session = Session()
     draft = session.query(Draft).filter_by(iddraft=draft_id).first()
@@ -51,7 +51,7 @@ def get_draft_by_id(draft_id):
     return draft.to_dict()
 
 @draft_blueprint.route('/drafts_by_edition/<int:draft_edition>', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_drafts_by_edition(draft_edition):
     session = Session()
     drafts = session.query(Draft).filter_by(edition=draft_edition).all()
@@ -60,7 +60,7 @@ def get_drafts_by_edition(draft_edition):
     return jsonify([draft.to_dict() for draft in drafts])
 
 @draft_blueprint.route('/draft_by_edition/<int:draft_edition>', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_draft_by_edition(draft_edition):
     session = Session()
     draft = session.query(Draft).filter_by(edition=draft_edition).first()
@@ -69,7 +69,7 @@ def get_draft_by_edition(draft_edition):
     return draft.to_dict()
 
 @draft_blueprint.route('/draft', methods=['POST'])
-# @jwt_required()
+@jwt_required()
 def create_draft():
     data = request.json
     player_id = data.get('player_id')
@@ -105,7 +105,7 @@ def create_draft():
         session.close()
 
 @draft_blueprint.route('/new_draft', methods=['POST'])
-# @jwt_required()
+@jwt_required()
 def new_draft():
     with Session() as session:
         try:
@@ -197,7 +197,7 @@ def new_draft():
             session.close()
 
 @draft_blueprint.route('/complete_draft', methods=['POST'])
-# @jwt_required()
+@jwt_required()
 def create_complete_draft():
     with Session() as session:
         try:
@@ -305,7 +305,7 @@ def create_complete_draft():
             session.close()
 
 @draft_blueprint.route('/draft/<int:draft_id>', methods=['PUT'])
-# @jwt_required()
+@jwt_required()
 def update_draft(draft_id):
     session = Session()
     draft = session.query(Draft).filter_by(iddraft=draft_id).first()

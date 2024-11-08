@@ -6,14 +6,14 @@ from database import Session
 from datetime import datetime
 
 @player_blueprint.route('/players', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_players():
     session = Session()
     players = session.query(Player).all()
     return jsonify([player.to_dict() for player in players])
 
 @player_blueprint.route('/player/<int:idplayer>', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_player_by_id(idplayer):
     session = Session()
     player = session.query(Player).filter_by(idplayer=idplayer).first()
@@ -23,7 +23,7 @@ def get_player_by_id(idplayer):
         return jsonify({'message': 'Jogador não encontrado'}), 404
 
 @player_blueprint.route('/player', methods=['POST'])
-# @jwt_required()
+@jwt_required()
 def create_player():
 
     data = request.form
@@ -66,7 +66,7 @@ def create_player():
         session.close()
 
 @player_blueprint.route('/subscribe_player', methods=['POST'])
-# @jwt_required()
+@jwt_required()
 def subscribe_player():
 
     player = request.json['player'] 
@@ -127,7 +127,7 @@ def subscribe_player():
         session.close()
 
 @player_blueprint.route('/player/<int:idplayer>', methods=['PUT'])
-# @jwt_required()
+@jwt_required()
 def update_player(idplayer):
     session = Session()
     player = session.query(Player).filter_by(idplayer=idplayer).first()
