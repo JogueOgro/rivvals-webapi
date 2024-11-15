@@ -123,6 +123,7 @@ class Match(Base):
     idmatch = Column(Integer, primary_key=True, nullable=False)
     team_idteam1 = Column(ForeignKey('team.idteam'), primary_key=True, nullable=False, index=True)
     team_idteam2 = Column(ForeignKey('team.idteam'), primary_key=True, nullable=False, index=True)
+    draftEdition = Column(String(45))
     phase = Column(String(45))
     group = Column(Integer)
     format = Column(String(45))
@@ -141,6 +142,7 @@ class Match(Base):
             'idmatch': self.idmatch,
             'team_idteam1': self.team_idteam1,
             'team_idteam2': self.team_idteam2,
+            'edition': self.draftEdition,
             'phase': self.phase,
             'group': self.group,
             'format': self.format,

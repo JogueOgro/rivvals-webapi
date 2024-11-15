@@ -5,8 +5,10 @@ from . import user_blueprint
 from model.models import *
 from database import Session
 from datetime import datetime
+from datetime import timedelta
 import bcrypt
 import json
+
 
 @user_blueprint.route('/users', methods=['GET'])
 @jwt_required()
@@ -63,7 +65,7 @@ def check_password():
     password=data.get('password').encode("utf-8")
 
     if bcrypt.checkpw(password, hashed_password):
-        token = create_access_token(identity=email)
+        token = create_access_token(identity=email, expires_delta=timedelta(hours=4))
         return jsonify(token=token), 200
 
     return jsonify({'message': 'Senha incorreta'}), 401
