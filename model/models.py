@@ -65,6 +65,8 @@ class Draft(Base):
                     'score_lol': self.player.score_lol,
                     'score_rocketleague': self.player.score_rocketleague,
                     'score_fallguys': self.player.score_fallguys,
+                    'score_pingpong': self.player.score_pingpong,
+                    'score_racing': self.player.score_racing,
                     },
                     'team': {
                     'idteam': self.team.idteam,
@@ -113,6 +115,8 @@ class Draft(Base):
                 'score_lol': self.player.score_lol,
                 'score_rocketleague': self.player.score_rocketleague,
                 'score_fallguys': self.player.score_fallguys,
+                'score_pingpong': self.player.score_pingpong,
+                'score_racing': self.player.score_racing,
                 },
             }
 
@@ -182,6 +186,8 @@ class Player(Base):
     score_lol = Column(Integer)
     score_rocketleague = Column(Integer)
     score_fallguys = Column(Integer)
+    score_pingpong = Column(Integer)
+    score_racing = Column(Integer)
 
     def to_dict(self):
         return {
@@ -207,6 +213,8 @@ class Player(Base):
             'score_lol': self.score_lol,
             'score_rocketleague': self.score_rocketleague,
             'score_fallguys': self.score_fallguys,
+            'score_pingpong': self.score_pingpong,
+            'score_racing': self.score_racing,
         }
 
 

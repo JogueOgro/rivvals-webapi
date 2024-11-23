@@ -152,6 +152,26 @@ def update_player(idplayer):
 
     return jsonify(player.to_dict())
 
+@player_blueprint.route('/player/pingpong/<int:idplayer>/<int:score>', methods=['PUT'])
+@jwt_required()
+def update_pingpong_score(idplayer, score):
+    session = Session()
+    try:
+        player = session.query(Player).filter_by(idplayer=idplayer).first()
+        if not player:
+            return jsonify({'message': 'Jogador não encontrado'}), 404
+
+        player.score_pingpong = score
+        session.commit()
+
+        return jsonify({'message': 'Score atualizado com sucesso'})
+    except Exception as e:
+        session.rollback()
+        return jsonify({'message': 'Erro ao atualizar score', 'error': str(e)}), 500
+    finally:
+        session.close()
+
+
 @player_blueprint.route('/player/<int:idplayer>', methods=['DELETE'])
 @jwt_required()
 def delete_player(idplayer):
