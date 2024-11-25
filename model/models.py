@@ -15,8 +15,8 @@ class Draft(Base):
     team_idteam = Column(ForeignKey('team.idteam'), primary_key=True, nullable=True, index=True)
     edition = Column(String(45), nullable=False)
     game = Column(String(45), nullable=False)
-    draftdate = Column(DateTime)
-    finaldate = Column(DateTime)
+    draftDate = Column(DateTime)
+    finalDate = Column(DateTime)
     teamsQuantity = Column(Integer)
     playersPerTeam = Column(Integer)
     groupsQuantity = Column(Integer)
@@ -34,8 +34,8 @@ class Draft(Base):
                 'team_idteam': self.team_idteam,
                 'edition': self.edition,
                 'game': self.game,
-                'draftdate': self.draftdate.isoformat() if self.draftdate else None,
-                'finaldate': self.finaldate.isoformat() if self.finaldate else None,
+                'draftDate': self.draftDate.isoformat() if self.draftDate else None,
+                'finalDate': self.finalDate.isoformat() if self.finalDate else None,
                 'teamsQuantity': self.teamsQuantity,
                 'playersPerTeam': self.playersPerTeam,
                 'groupsQuantity': self.groupsQuantity,
@@ -84,8 +84,8 @@ class Draft(Base):
             'team_idteam': self.team_idteam,
             'edition': self.edition,
             'game': self.game,
-            'draftdate': self.draftdate.isoformat() if self.draftdate else None,
-            'finaldate': self.finaldate.isoformat() if self.finaldate else None,
+            'draftDate': self.draftDate.isoformat() if self.draftDate else None,
+            'finalDate': self.finalDate.isoformat() if self.finalDate else None,
             'teamsQuantity': self.teamsQuantity,
             'playersPerTeam': self.playersPerTeam,
             'groupsQuantity': self.groupsQuantity,
@@ -135,18 +135,23 @@ class Match(Base):
     hour = Column(String(45))
     isDone = Column(Integer)
     isScheduled = Column(Integer)
-    score = Column(String(45))
+    winner = Column(String(45))
+    scoreTeam1 = Column(String(45))
+    scoreTeam2 = Column(String(45))
     freeSchedule = Column(String(150))
+    conclusionDate = Column(DateTime)
 
-    team = relationship('Team', primaryjoin='Match.team_idteam1 == Team.idteam')
-    team1 = relationship('Team', primaryjoin='Match.team_idteam2 == Team.idteam')
+    team1 = relationship('Team', primaryjoin='Match.team_idteam1 == Team.idteam')
+    team2 = relationship('Team', primaryjoin='Match.team_idteam2 == Team.idteam')
 
     def to_dict(self):
         return {
             'idmatch': self.idmatch,
             'team_idteam1': self.team_idteam1,
             'team_idteam2': self.team_idteam2,
-            'edition': self.draftEdition,
+            'team1': self.team1.to_dict() if self.team1 else None,
+            'team2': self.team2.to_dict() if self.team2 else None,
+            'draftEdition': self.draftEdition,
             'phase': self.phase,
             'group': self.group,
             'format': self.format,
@@ -154,8 +159,11 @@ class Match(Base):
             'hour': self.hour,
             'isDone': self.isDone,
             'isScheduled': self.isScheduled,
-            'score': self.score,
-            'freeSchedule': self.freeSchedule
+            'winner': self.winner,
+            'scoreTeam1': self.scoreTeam1,
+            'scoreTeam2': self.scoreTeam2,
+            'freeSchedule': self.freeSchedule,
+            'conclusionDate': self.conclusionDate
         }
 
 

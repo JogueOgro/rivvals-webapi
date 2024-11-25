@@ -76,8 +76,8 @@ def create_draft():
     team_id = data.get('team_id')
     edicao = data.get('edition')
     game = data.get('game')
-    draftdate = data.get('draftdate')
-    finaldate = data.get('finaldate')
+    draftDate = data.get('draftDate')
+    finalDate = data.get('finalDate')
     teamsQuantity = data.get('teamsQuantity')
     playersPerTeam = data.get('playersPerTeam')
 
@@ -87,8 +87,8 @@ def create_draft():
             team_idteam=team_id,
             edicao=edicao,
             game=game,
-            draftdate=draftdate,
-            finaldate=finaldate
+            draftDate=draftDate,
+            finalDate=finalDate
         )
 
         session = Session()
@@ -173,7 +173,7 @@ def new_draft():
                     draft.game = request.json['config']['game']
                     draft.teamsQuantity = request.json['config']['teamsQuantity']
                     draft.playersPerTeam = request.json['config']['teamPlayersQuantity']
-                    draft.draftdate = datetime.now()
+                    draft.draftDate = datetime.now()
                     draft.isActive = 1
                 else:
                     draft = Draft(
@@ -182,7 +182,7 @@ def new_draft():
                         game = request.json['config']['game'],
                         teamsQuantity =  request.json['config']['teamsQuantity'],
                         playersPerTeam = request.json['config']['teamPlayersQuantity'],
-                        draftdate =  datetime.now(),
+                        draftDate =  datetime.now(),
                         isActive = 1
                     )
                     session.add(draft)
@@ -280,7 +280,7 @@ def create_complete_draft():
                     draft.game = request.json['config']['game']
                     draft.teamsQuantity = request.json['config']['teamsQuantity']
                     draft.playersPerTeam = request.json['config']['teamPlayersQuantity']
-                    draft.draftdate = datetime.now()
+                    draft.draftDate = datetime.now()
                     draft.isActive = 0
                 else:
                     draft = Draft(
@@ -290,7 +290,7 @@ def create_complete_draft():
                         game = request.json['config']['game'],
                         teamsQuantity =  request.json['config']['teamsQuantity'],
                         playersPerTeam = request.json['config']['teamPlayersQuantity'],
-                        draftdate =  datetime.now(),
+                        draftDate =  datetime.now(),
                         isActive = 0
                     )
                     session.add(draft)
@@ -317,8 +317,8 @@ def update_draft(draft_id):
     draft.team_idteam = data.get('team_id') or draft.team_idteam
     draft.edicao = data.get('edicao') or draft.edicao
     draft.game = data.get('game') or draft.game
-    draft.draftdate = data.get('draftdate') or draft.draftdate
-    draft.finaldate = data.get('finaldate') or draft.finaldate
+    draft.draftDate = data.get('draftDate') or draft.draftDate
+    draft.finalDate = data.get('finalDate') or draft.finalDate
 
     try:
         session.commit()
@@ -330,6 +330,38 @@ def update_draft(draft_id):
 
     finally:
         session.close()
+
+@draft_blueprint.route('/draft/<int:draft_edition>/groups', methods=['PUT'])
+@jwt_required()
+def update_draft_groups(draft_edition):
+    session = Session()
+    
+    # Busca todos os drafts com a edição fornecida
+    drafts = session.query(Draft).filter(Draft.edition == draft_edition).all()
+    
+    if not drafts:
+        return jsonify({'message': 'Nenhum draft encontrado com essa edição'}), 404
+
+    data = request.json
+
+    # Atualiza os atributos para todos os drafts encontrados
+    for draft in drafts:
+        if 'groupsQuantity' in data:
+            draft.groupsQuantity = data['groupsQuantity']
+        if 'teamsPerGroup' in data:
+            draft.teamsPerGroup = data['teamsPerGroup']
+
+    try:
+        session.commit()
+        return jsonify([draft.to_dict() for draft in drafts])  # Retorna todos os drafts atualizados
+
+    except Exception as e:
+        session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        session.close()
+
 
 @draft_blueprint.route('/draft/<int:draft_id>', methods=['DELETE'])
 @jwt_required()

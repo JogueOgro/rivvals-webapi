@@ -112,7 +112,7 @@ def subscribe_player():
     player_idplayer = new_player.idplayer,
     edition = config.get('edition'),
     game = config.get('game'),
-    draftdate =  datetime.now(),
+    draftDate =  datetime.now(),
     isActive = 1,
     )
     
