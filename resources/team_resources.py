@@ -95,17 +95,5 @@ def update_all_teams():
 
     return jsonify({'message': 'Teams atualizados!'}), 200
 
-@team_blueprint.route('/team/<int:team_id>', methods=['DELETE'])
-@jwt_required()
-def delete_team(team_id):
-    session = Session()
-    team = session.query(Team).filter_by(idteam=team_id).first()
-    if not team:
-      return jsonify({'message': 'Time não encontrado'}), 404
-    else:
-        session.delete(team)
-        session.commit()
-    return team.to_dict()
-
 
 

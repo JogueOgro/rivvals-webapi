@@ -202,17 +202,6 @@ def update_all_matches():
 
     return jsonify({'message': 'matches atualizados!'}), 200
 
-@match_blueprint.route('/match/<int:match_id>', methods=['DELETE'])
-@jwt_required()
-def delete_match(match_id):
-    session = Session()
-    match = session.query(Match).filter_by(idmatch=match_id).first()
-    if not match:
-      return jsonify({'message': 'Time não encontrado'}), 404
-    else:
-        session.delete(match)
-        session.commit()
-    return match.to_dict()
 
 
 

@@ -4,6 +4,7 @@ from . import player_blueprint
 from model.models import *
 from database import Session
 from datetime import datetime
+from email_validator import validate_email, EmailNotValidError
 
 @player_blueprint.route('/players', methods=['GET'])
 @jwt_required()
@@ -21,6 +22,27 @@ def get_player_by_id(idplayer):
         return jsonify(player.to_dict())
     else:
         return jsonify({'message': 'Jogador não encontrado'}), 404
+    
+
+
+@player_blueprint.route('/player/email/<string:email>', methods=['GET'])
+@jwt_required()
+def get_player_by_email(email):
+    try:
+        # Valida o formato do e-mail
+        validate_email(email)
+    except EmailNotValidError as e:
+        return jsonify({'message': 'Email inválido', 'error': str(e)}), 400
+
+    session = Session()
+    try:
+        player = session.query(Player).filter_by(email=email).first()
+        if player:
+            return jsonify(player.to_dict())
+        else:
+            return jsonify({'message': 'Jogador não encontrado'}), 404
+    finally:
+        session.close()
 
 @player_blueprint.route('/player', methods=['POST'])
 @jwt_required()
@@ -136,7 +158,7 @@ def update_player(idplayer):
 
     data = request.json
 
-    player.name = data['name']
+    player.name = data.get('name')
     player.nick = data.get('nick')
     player.twitch = data.get('twitch')
     player.email = data.get('email')
@@ -170,17 +192,3 @@ def update_pingpong_score(idplayer, score):
         return jsonify({'message': 'Erro ao atualizar score', 'error': str(e)}), 500
     finally:
         session.close()
-
-
-@player_blueprint.route('/player/<int:idplayer>', methods=['DELETE'])
-@jwt_required()
-def delete_player(idplayer):
-    session = Session()
-    player = session.query(Player).filter_by(idplayer=idplayer).first()
-    if not player:
-        return jsonify({'message': 'Jogador não encontrado'}), 404
-
-    session.delete(player)
-    session.commit()
-
-    return jsonify(player.to_dict())

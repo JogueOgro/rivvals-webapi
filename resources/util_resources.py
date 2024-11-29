@@ -6,8 +6,10 @@ from model.models import *
 # from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-import json
 import os
+from functools import wraps
+from flask import request, jsonify
+from flask_jwt_extended import verify_jwt_in_request, get_jwt
 
 @util_blueprint.route('/generate_sas_token', methods=['POST'])
 def generate_sas_token():
@@ -31,4 +33,33 @@ def generate_sas_token():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+def validate_claims():
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                verify_jwt_in_request()
+
+                claims = get_jwt()
+                
+                client_ip = request.remote_addr
+                user_agent = request.headers.get('User-Agent')
+
+                if claims.get('ip') != client_ip:
+                    return jsonify({"error": "IP mismatch"}), 401
+
+                if claims.get('user_agent') != user_agent:
+                    return jsonify({"error": "User-Agent mismatch"}), 401
+
+                if not claims.get('auth'):
+                    return jsonify({"error": "Authorization claims missing"}), 403
+
+                return func(*args, **kwargs)
+            except Exception as e:
+                return jsonify({"error": str(e)}), 401
+
+        return wrapper
+    return decorator
+
 

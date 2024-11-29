@@ -361,24 +361,3 @@ def update_draft_groups(draft_edition):
 
     finally:
         session.close()
-
-
-@draft_blueprint.route('/draft/<int:draft_id>', methods=['DELETE'])
-@jwt_required()
-def delete_draft(draft_id):
-    session = Session()
-    draft = session.query(Draft).filter_by(iddraft=draft_id).first()
-    if not draft:
-        return jsonify({'message': 'Draft não encontrado'}), 404
-
-    try:
-        session.delete(draft)
-        session.commit()
-        return jsonify({'message': 'Draft deleted successfully'})
-
-    except Exception as e:
-        session.rollback()
-        return jsonify({'error': str(e)}), 500
-
-    finally:
-        session.close()

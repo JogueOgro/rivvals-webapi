@@ -8,6 +8,7 @@ from datetime import datetime
 from datetime import timedelta
 import bcrypt
 import json
+import secrets
 
 
 @user_blueprint.route('/users', methods=['GET'])
@@ -41,6 +42,7 @@ def create_user():
         name=data.get('name'),
         email=data.get('email'),
         password=hashed_password,
+        auth='regular',
         creation_date=datetime.now(),
     )
 
@@ -64,8 +66,18 @@ def check_password():
     hashed_password = user.password.encode("utf-8")
     password=data.get('password').encode("utf-8")
 
+    user_agent = request.headers.get('User-Agent', 'unknown')
+    client_ip = request.remote_addr
+    
+    additional_claims = {
+        'user_agent': user_agent,
+        'ip': client_ip,
+        "secret_gen_key": secrets.token_hex(16),
+        'auth': user.auth
+    }
+
     if bcrypt.checkpw(password, hashed_password):
-        token = create_access_token(identity=email, expires_delta=timedelta(hours=4))
+        token = create_access_token(identity=email, additional_claims=additional_claims, expires_delta=timedelta(hours=4))
         return jsonify(token=token), 200
 
     return jsonify({'message': 'Senha incorreta'}), 401
@@ -102,14 +114,3 @@ def update_user(user_id):
         session.commit()
     return user.to_dict()
 
-@user_blueprint.route('/user/<int:user_id>', methods=['DELETE'])
-@jwt_required()
-def delete_user(user_id):
-    session = Session()
-    user = session.query(User).filter_by(iduser=user_id).first()
-    if not user:
-      return jsonify({'message': 'Usuário não encontrado'}), 404
-    else:
-        session.delete(user)
-        session.commit()
-    return user.to_dict()
