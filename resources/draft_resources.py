@@ -59,14 +59,26 @@ def get_drafts_by_edition(draft_edition):
         return jsonify({'message': 'Draft não encontrado'}), 404
     return jsonify([draft.to_dict() for draft in drafts])
 
-@draft_blueprint.route('/draft_by_edition/<int:draft_edition>', methods=['GET'])
+@draft_blueprint.route('/draft_by_edition/<int:draft_edition>/player/<int:idplayer>', methods=['GET'])
 @jwt_required()
-def get_draft_by_edition(draft_edition):
+def get_draft_by_edition_and_by_player(draft_edition, idplayer):
     session = Session()
-    draft = session.query(Draft).filter_by(edition=draft_edition).first()
-    if not draft:
-        return jsonify({'message': 'Draft não encontrado'}), 404
-    return draft.to_dict()
+    try:
+        draft = (
+            session.query(Draft)
+            .filter(Draft.edition == draft_edition, Draft.player_idplayer == idplayer)
+            .first()
+        )
+
+        if not draft:
+            return jsonify({'message': 'Draft não encontrado para o jogador informado'}), 404
+
+        return jsonify(draft.to_dict())
+    except Exception as e:
+        return jsonify({'message': 'Erro no servidor', 'error': str(e)}), 500
+    finally:
+        session.close()
+
 
 @draft_blueprint.route('/draft', methods=['POST'])
 @jwt_required()

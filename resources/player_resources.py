@@ -1,10 +1,13 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required
+from werkzeug.utils import secure_filename
 from . import player_blueprint
 from model.models import *
 from database import Session
 from datetime import datetime
 from email_validator import validate_email, EmailNotValidError
+import os
+import hashlib
 
 @player_blueprint.route('/players', methods=['GET'])
 @jwt_required()
@@ -12,6 +15,7 @@ def get_players():
     session = Session()
     players = session.query(Player).all()
     return jsonify([player.to_dict() for player in players])
+
 
 @player_blueprint.route('/player/<int:idplayer>', methods=['GET'])
 @jwt_required()
@@ -23,18 +27,17 @@ def get_player_by_id(idplayer):
     else:
         return jsonify({'message': 'Jogador não encontrado'}), 404
     
-
-
+    
 @player_blueprint.route('/player/email/<string:email>', methods=['GET'])
 @jwt_required()
 def get_player_by_email(email):
     try:
-        # Valida o formato do e-mail
         validate_email(email)
     except EmailNotValidError as e:
         return jsonify({'message': 'Email inválido', 'error': str(e)}), 400
 
     session = Session()
+    
     try:
         player = session.query(Player).filter_by(email=email).first()
         if player:
@@ -43,6 +46,7 @@ def get_player_by_email(email):
             return jsonify({'message': 'Jogador não encontrado'}), 404
     finally:
         session.close()
+        
 
 @player_blueprint.route('/player', methods=['POST'])
 @jwt_required()
@@ -55,7 +59,7 @@ def create_player():
         nick=data.get('nick'),
         twitch=data.get('twitch'),
         email=data.get('email'),
-        schedule=data.get('schedule'),
+        schedule=str(data.get('schedule')),
         coins=data.get('coins'),
         stars=data.get('stars'),
         medal=data.get('medal'),
@@ -80,12 +84,13 @@ def create_player():
         session.add(new_player)
         session.commit()
         session.refresh(new_player)  # Refresh na instancia para evitar erros
-        return new_player.to_dict()
+        return jsonify({'message': 'Player criado com sucesso'}), 200
     except Exception as e:
         session.rollback()
         return jsonify({'error': str(e)}), 500
     finally:
         session.close()
+        
 
 @player_blueprint.route('/subscribe_player', methods=['POST'])
 @jwt_required()
@@ -107,7 +112,7 @@ def subscribe_player():
         nick=player.get('nick'),
         twitch=player.get('twitch'),
         email=player.get('email'),
-        schedule=player.get('schedule'),
+        schedule=str(player.get('schedule')),
         coins=player.get('coins'),
         stars=player.get('stars'),
         medal=player.get('medal'),
@@ -141,12 +146,13 @@ def subscribe_player():
     try:
         session.add(draft)
         session.commit()
-        return new_player.to_dict()
+        return jsonify({'message': 'Player registrado com sucesso'}), 200
     except Exception as e:
         session.rollback()
         return jsonify({'error': str(e)}), 500
     finally:
         session.close()
+        
 
 @player_blueprint.route('/player/<int:idplayer>', methods=['PUT'])
 @jwt_required()
@@ -162,17 +168,67 @@ def update_player(idplayer):
     player.nick = data.get('nick')
     player.twitch = data.get('twitch')
     player.email = data.get('email')
-    player.schedule = data.get('schedule')
-    player.coins = data.get('coins')
-    player.stars = data.get('stars')
-    player.medal = data.get('medal')
-    player.wins = data.get('wins')
-    player.tags = data.get('tags')
-    player.photo = data.get('photo')
+    player.riot = data.get('riot')
+    player.steam = data.get('steam')
+    player.epic = data.get('epic')
+    player.xbox = data.get('xbox')
+    player.psn = data.get('psn')
 
     session.commit()
 
-    return jsonify(player.to_dict())
+    return jsonify({'message': 'Atualização realizada com sucesso'}), 200
+
+@player_blueprint.route('/player/schedule/<int:idplayer>', methods=['PUT'])
+@jwt_required()
+def update_player_schedule(idplayer):
+    session = Session()
+    player = session.query(Player).filter_by(idplayer=idplayer).first()
+    if not player:
+        return jsonify({'message': 'Jogador não encontrado'}), 404
+
+    data = request.json
+
+    player.schedule = str(data.get('schedule'))
+    session.commit()
+
+    return jsonify({'message': 'Atualização realizada com sucesso'}), 200
+
+
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'pictures')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@player_blueprint.route('/player/picture/<int:idplayer>', methods=['PUT'])
+@jwt_required()
+def update_player_picture(idplayer):
+    session = Session()
+    player = session.query(Player).filter_by(idplayer=idplayer).first()
+    if not player:
+        return jsonify({'message': 'Jogador não encontrado'}), 404
+
+    if 'file' not in request.files:
+        return jsonify({'message': 'Nenhum arquivo enviado'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'message': 'Nenhum arquivo selecionado'}), 400
+
+    filename = secure_filename(file.filename)
+    file_hash = hashlib.md5(filename.encode()).hexdigest()
+    file_extension = os.path.splitext(filename)[1]
+    new_filename = f"{file_hash}{file_extension}"
+
+    file_path = os.path.join(UPLOAD_FOLDER, new_filename)
+
+    try:
+        file.save(file_path)
+        player.photo = f"pictures/{new_filename}"
+        session.commit()
+        return jsonify({'message': 'Foto atualizada com sucesso', 'photo': player.photo}), 200
+    except Exception as e:
+        return jsonify({'message': 'Erro ao salvar o arquivo', 'error': str(e)}), 500
+    finally:
+        session.close()
+
 
 @player_blueprint.route('/player/pingpong/<int:idplayer>/<int:score>', methods=['PUT'])
 @jwt_required()

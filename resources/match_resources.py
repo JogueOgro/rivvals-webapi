@@ -1,14 +1,13 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required
 from sqlalchemy.orm import joinedload
+from sqlalchemy import or_
 from sqlalchemy.dialects.mysql import insert
 from . import match_blueprint
 from database import Session
 from datetime import datetime
 from model.models import *
 import json
-
-
 
 @match_blueprint.route('/matches', methods=['GET'])
 @jwt_required()
@@ -18,6 +17,7 @@ def get_matches():
     matches_dicts = [match.to_dict() for match in matches]
     return matches_dicts
 
+
 @match_blueprint.route('/matches/<int:edition_id>', methods=['GET'])
 @jwt_required()
 def get_matches_by_edition(edition_id):
@@ -25,6 +25,31 @@ def get_matches_by_edition(edition_id):
     matches = session.query(Match).options(joinedload(Match.team1),joinedload(Match.team2)).filter_by(draftEdition=edition_id).all()
     matches_dicts = [match.to_dict() for match in matches]
     return matches_dicts
+
+
+@match_blueprint.route('/matches/scheduled/<int:edition_id>/<int:idteam>', methods=['GET'])
+@jwt_required()
+def get_scheduled_matches_by_edition_by_team(edition_id, idteam):
+    session = Session()
+    try:
+        matches = (
+            session.query(Match)
+            .options(joinedload(Match.team1), joinedload(Match.team2))
+            .filter(
+                Match.draftEdition == edition_id,
+                or_(Match.team_idteam1 == idteam, Match.team_idteam2 == idteam),
+                Match.isScheduled == 1
+            )
+            .all()
+        )
+        
+        matches_dicts = [match.to_dict() for match in matches]
+        return jsonify(matches_dicts)
+    except Exception as e:
+        return jsonify({'message': 'Erro no servidor', 'error': str(e)}), 500
+    finally:
+        session.close()
+
 
 @match_blueprint.route('/match/<int:match_id>', methods=['GET'])
 @jwt_required()
@@ -35,6 +60,7 @@ def get_match_by_id(match_id):
     if not match:
       return jsonify({'message': 'Partida não encontrada'}), 404
     return match.to_dict()
+
 
 @match_blueprint.route('/match', methods=['POST'])
 @jwt_required()
@@ -54,6 +80,7 @@ def create_match():
     session.add(new_match)
     session.commit()
     return new_match.to_dict()
+
 
 @match_blueprint.route('/matches', methods=['POST'])
 @jwt_required()
@@ -105,6 +132,7 @@ def upsert_all_matches():
     finally:
         session.close()
 
+
 @match_blueprint.route('/match/<int:match_id>', methods=['PUT'])
 @jwt_required()
 def update_match(match_id):
@@ -132,6 +160,7 @@ def update_match(match_id):
 
     finally:
         session.close()
+
 
 @match_blueprint.route('/match/scores', methods=['POST'])
 @jwt_required()
@@ -164,7 +193,6 @@ def update_scores():
 
     finally:
         session.close()
-
 
 
 @match_blueprint.route('/matches', methods=['PUT'])
