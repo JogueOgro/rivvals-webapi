@@ -37,12 +37,11 @@ def get_scheduled_matches_by_edition_by_team(edition_id, idteam):
             .options(joinedload(Match.team1), joinedload(Match.team2))
             .filter(
                 Match.draftEdition == edition_id,
-                or_(Match.team_idteam1 == idteam, Match.team_idteam2 == idteam),
-                Match.isScheduled == 1
+                Match.isScheduled == 1,
+                or_(Match.team_idteam1 == idteam, Match.team_idteam2 == idteam)
             )
             .all()
         )
-        
         matches_dicts = [match.to_dict() for match in matches]
         return jsonify(matches_dicts)
     except Exception as e:
@@ -51,15 +50,27 @@ def get_scheduled_matches_by_edition_by_team(edition_id, idteam):
         session.close()
 
 
+from sqlalchemy.orm import joinedload
+
 @match_blueprint.route('/match/<int:match_id>', methods=['GET'])
 @jwt_required()
 def get_match_by_id(match_id):
     session = Session()
-    match = session.query(Match).filter_by(idmatch=match_id).first()
-    session.close()
-    if not match:
-      return jsonify({'message': 'Partida não encontrada'}), 404
-    return match.to_dict()
+    try:
+        match = (
+            session.query(Match)
+            .options(joinedload(Match.team1), joinedload(Match.team2))
+            .filter_by(idmatch=match_id)
+            .first()
+        )
+        if not match:
+            return jsonify({'message': 'Partida não encontrada'}), 404
+        return jsonify(match.to_dict())
+    except Exception as e:
+        return jsonify({'message': 'Erro interno do servidor', 'error': str(e)}), 500
+    finally:
+        session.close()
+
 
 
 @match_blueprint.route('/match', methods=['POST'])
@@ -90,37 +101,44 @@ def upsert_all_matches():
 
     try:
         for match_data in data:
-            stmt = insert(Match).values(
-                team_idteam1=match_data.get('team1').get('id'),
-                team_idteam2=match_data.get('team2').get('id'),
-                draftEdition=match_data.get('draftEdition'),
-                phase=match_data.get('phase'),
-                group=match_data.get('group'),
-                format=match_data.get('format'),
-                day=match_data.get('day'),
-                hour=match_data.get('hour'),
-                isDone=match_data.get('isDone'),
-                isScheduled=match_data.get('isScheduled'),
-                winner=match_data.get('winner'),
-                scoreTeam1=match_data.get('scoreTeam1'),
-                scoreTeam2=match_data.get('scoreTeam2'),
-                freeSchedule=str(match_data.get('freeSchedule')),
-            )
-            update_fields = {
-                'group': match_data.get('group'),
-                'format': match_data.get('format'),
-                'day': match_data.get('day'),
-                'hour': match_data.get('hour'),
-                'isDone': match_data.get('isDone'),
-                'isScheduled': match_data.get('isScheduled'),
-                'winner': match_data.get('winner'),
-                'scoreTeam1': match_data.get('scoreTeam1'),
-                'scoreTeam2': match_data.get('scoreTeam2'),
-                'freeSchedule': str(match_data.get('freeSchedule')),
-            }
+            existing_match = session.query(Match).filter(
+                Match.team_idteam1 == match_data.get('team1').get('id'),
+                Match.team_idteam2 == match_data.get('team2').get('id'),
+                Match.draftEdition == match_data.get('draftEdition'),
+            ).first()
 
-            stmt = stmt.on_duplicate_key_update(update_fields)
-            session.execute(stmt)
+            if existing_match:
+                existing_match.phase = match_data.get('phase')
+                existing_match.group = match_data.get('group')
+                existing_match.format = match_data.get('format')
+                existing_match.isDone = match_data.get('isDone')
+                existing_match.isScheduled = match_data.get('isScheduled')
+                existing_match.scheduledDate = match_data.get('scheduledDate')
+                existing_match.winner = match_data.get('winner')
+                existing_match.scoreTeam1 = match_data.get('scoreTeam1')
+                existing_match.scoreTeam2 = match_data.get('scoreTeam2')
+                existing_match.freeSchedule = str(match_data.get('freeSchedule'))
+                existing_match.confirmation = str(match_data.get('confirmation'))
+                existing_match.conclusionDate = match_data.get('conclusionDate')
+            else:
+                new_match = Match(
+                    team_idteam1=match_data.get('team1').get('id'),
+                    team_idteam2=match_data.get('team2').get('id'),
+                    draftEdition=match_data.get('draftEdition'),
+                    phase=match_data.get('phase'),
+                    group=match_data.get('group'),
+                    format=match_data.get('format'),
+                    isDone=match_data.get('isDone'),
+                    isScheduled=match_data.get('isScheduled'),
+                    scheduledDate=match_data.get('scheduledDate'),
+                    winner=match_data.get('winner'),
+                    scoreTeam1=match_data.get('scoreTeam1'),
+                    scoreTeam2=match_data.get('scoreTeam2'),
+                    freeSchedule=str(match_data.get('freeSchedule')),
+                    confirmation=str(match_data.get('confirmation')),
+                    conclusionDate=match_data.get('conclusionDate'),
+                )
+                session.add(new_match)
 
         session.commit()
         return jsonify({'message': 'Upsert concluído com sucesso'}), 200
@@ -137,30 +155,47 @@ def upsert_all_matches():
 @jwt_required()
 def update_match(match_id):
     session = Session()
+    
+    def parse_date(date_string):
+        if not date_string:
+            return None
+        try:
+            parsed_date = datetime.strptime(date_string, "%a, %d %b %Y %H:%M:%S GMT")
+            return parsed_date.strftime("%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            return date_string
+
     try:
-        match = session.query(Match).filter_by(id=match_id).first()
+        match = session.query(Match).filter_by(idmatch=match_id).first()
         if not match:
             return jsonify({'error': 'Match not found'}), 404
 
         data = request.json
         allowed_fields = [
-            'team1', 'team2', 'draftEdition', 'phase', 'group', 'format', 
-            'day', 'hour', 'isDone', 'isScheduled', 'score', 'freeSchedule'
+            'team_idteam1', 'team_idteam2', 'draftEdition', 'phase', 'group', 
+            'format', 'isDone', 'isScheduled', 'scheduledDate', 'winner', 
+            'scoreTeam1', 'scoreTeam2', 'freeSchedule', 'confirmation', 'conclusionDate'
         ]
+
         for key in allowed_fields:
             if key in data:
-                setattr(match, key.lower() if key.lower() != key else key, data[key])
+                if key == 'confirmation' and isinstance(data[key], dict):
+                    setattr(match, key, json.dumps(data[key]))
+                elif key == 'scheduledDate' or key == 'conclusionDate':
+                    setattr(match, key, parse_date(data[key]))
+                else:
+                    setattr(match, key, data[key])
 
         session.commit()
-        return jsonify({'message': 'Match updated successfully', 'match': match.id}), 200
+        return jsonify({'message': 'Match updated successfully', 'match_id': match.idmatch}), 200
 
-    except e:
+    except Exception as e:
         session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
 
     finally:
         session.close()
-
+        
 
 @match_blueprint.route('/match/scores', methods=['POST'])
 @jwt_required()

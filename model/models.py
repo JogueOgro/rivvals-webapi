@@ -131,14 +131,14 @@ class Match(Base):
     phase = Column(String(45))
     group = Column(Integer)
     format = Column(String(45))
-    day = Column(String(45))
-    hour = Column(String(45))
     isDone = Column(Integer)
     isScheduled = Column(Integer)
+    scheduledDate = Column(DateTime)
     winner = Column(String(45))
     scoreTeam1 = Column(String(45))
     scoreTeam2 = Column(String(45))
     freeSchedule = Column(String(150))
+    confirmation = Column(String(150))
     conclusionDate = Column(DateTime)
 
     team1 = relationship('Team', primaryjoin='Match.team_idteam1 == Team.idteam')
@@ -155,14 +155,14 @@ class Match(Base):
             'phase': self.phase,
             'group': self.group,
             'format': self.format,
-            'day': self.day,
-            'hour': self.hour,
             'isDone': self.isDone,
             'isScheduled': self.isScheduled,
+            'scheduledDate': self.scheduledDate,
             'winner': self.winner,
             'scoreTeam1': self.scoreTeam1,
             'scoreTeam2': self.scoreTeam2,
             'freeSchedule': self.freeSchedule,
+            'confirmation': self.confirmation,
             'conclusionDate': self.conclusionDate
         }
 

@@ -65,8 +65,8 @@ def update_team(team_id):
 def update_all_teams():
     try:
         session = Session()
-
         teams_data = request.json
+
         for team_data in teams_data:
             team_id = team_data.get('id')
             if not team_id:
@@ -82,9 +82,10 @@ def update_all_teams():
             filtered_data = {key: value for key, value in update_data.items() if value is not None}
 
             if filtered_data:
-                session.query(Team).filter_by(idteam=team_id).update(filtered_data, synchronize_session=False)
+                session.query(Team).filter_by(idteam=team_id).update(filtered_data, synchronize_session='fetch')
 
         session.commit()
+        return jsonify({'message': 'Teams atualizados!'}), 200
 
     except Exception as e:
         session.rollback()
@@ -92,8 +93,3 @@ def update_all_teams():
 
     finally:
         session.close()
-
-    return jsonify({'message': 'Teams atualizados!'}), 200
-
-
-

@@ -50,6 +50,15 @@ def get_draft_by_id(draft_id):
         return jsonify({'message': 'Draft não encontrado'}), 404
     return draft.to_dict()
 
+@draft_blueprint.route('/drafts/<int:team_id>', methods=['GET'])
+@jwt_required()
+def get_draft_by_team_id(team_id):
+    session = Session()
+    draft = session.query(Draft).filter_by(team_idteam=team_id).all()
+    if not draft:
+        return jsonify({'message': 'Draft não encontrado'}), 404
+    return draft.to_dict()
+
 @draft_blueprint.route('/drafts_by_edition/<int:draft_edition>', methods=['GET'])
 @jwt_required()
 def get_drafts_by_edition(draft_edition):
