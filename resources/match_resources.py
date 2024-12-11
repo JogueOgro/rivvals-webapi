@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_
 from sqlalchemy.dialects.mysql import insert
+import pytz
 from . import match_blueprint
 from database import Session
 from datetime import datetime
@@ -174,11 +175,23 @@ def update_match(match_id):
         allowed_fields = [
             'team_idteam1', 'team_idteam2', 'draftEdition', 'phase', 'group', 
             'format', 'isDone', 'isScheduled', 'scheduledDate', 'winner', 
-            'scoreTeam1', 'scoreTeam2', 'freeSchedule', 'confirmation', 'conclusionDate'
+            'scoreTeam1', 'scoreTeam2', 'freeSchedule', 'reschedule', 'confirmation', 'conclusionDate'
         ]
+
+        def parse_date(date_str):
+            if isinstance(date_str, str):
+                date_obj = datetime.fromisoformat(date_str)
+                return date_obj.astimezone(pytz.utc)
+            elif isinstance(date_str, datetime):
+                if date_str.tzinfo is None:
+                    return date_str.replace(tzinfo=pytz.utc)
+                return date_str.astimezone(pytz.utc)
+            return date_str
 
         for key in allowed_fields:
             if key in data:
+                if key == 'freeSchedule' and isinstance(data[key], list):
+                    setattr(match, key, json.dumps(data[key]))
                 if key == 'confirmation' and isinstance(data[key], dict):
                     setattr(match, key, json.dumps(data[key]))
                 elif key == 'scheduledDate' or key == 'conclusionDate':
@@ -187,7 +200,7 @@ def update_match(match_id):
                     setattr(match, key, data[key])
 
         session.commit()
-        return jsonify({'message': 'Match updated successfully', 'match_id': match.idmatch}), 200
+        return jsonify({'message': 'Partida Atualizada'}), 200
 
     except Exception as e:
         session.rollback()

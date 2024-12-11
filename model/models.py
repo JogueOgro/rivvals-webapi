@@ -1,7 +1,8 @@
 # coding: utf-8
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData, String, Table
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+import pytz
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -137,14 +138,20 @@ class Match(Base):
     winner = Column(String(45))
     scoreTeam1 = Column(String(45))
     scoreTeam2 = Column(String(45))
-    freeSchedule = Column(String(150))
-    confirmation = Column(String(150))
+    freeSchedule = Column(Text)
+    reschedule = Column(Text)
+    confirmation = Column(Text)
     conclusionDate = Column(DateTime)
 
     team1 = relationship('Team', primaryjoin='Match.team_idteam1 == Team.idteam')
     team2 = relationship('Team', primaryjoin='Match.team_idteam2 == Team.idteam')
 
     def to_dict(self):
+        def convert_to_brazilian_time(dt):
+            if dt:
+                brazil_tz = pytz.timezone('America/Sao_Paulo')
+                return dt.astimezone(brazil_tz).isoformat()
+            return None
         return {
             'idmatch': self.idmatch,
             'team_idteam1': self.team_idteam1,
@@ -157,13 +164,14 @@ class Match(Base):
             'format': self.format,
             'isDone': self.isDone,
             'isScheduled': self.isScheduled,
-            'scheduledDate': self.scheduledDate,
+            'scheduledDate': convert_to_brazilian_time(self.scheduledDate),
+            'reschedule': self.reschedule,
             'winner': self.winner,
             'scoreTeam1': self.scoreTeam1,
             'scoreTeam2': self.scoreTeam2,
             'freeSchedule': self.freeSchedule,
             'confirmation': self.confirmation,
-            'conclusionDate': self.conclusionDate
+            'conclusionDate': convert_to_brazilian_time(self.conclusionDate)
         }
 
 
@@ -175,7 +183,7 @@ class Player(Base):
     nick = Column(String(45))
     twitch = Column(String(45))
     email = Column(String(45))
-    schedule = Column(String(150))
+    schedule = Column(Text)
     coins = Column(Integer)
     stars = Column(String(45))
     medal = Column(Integer)
