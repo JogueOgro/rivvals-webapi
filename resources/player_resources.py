@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, jsonify, send_from_directory
 from flask_jwt_extended import jwt_required
 from werkzeug.utils import secure_filename
 from . import player_blueprint
@@ -52,31 +52,21 @@ def get_player_by_email(email):
 @jwt_required()
 def create_player():
 
-    data = request.form
+    data = request.json
 
     new_player = Player(
         name=data.get('name'),
         nick=data.get('nick'),
         twitch=data.get('twitch'),
         email=data.get('email'),
-        schedule=str(data.get('schedule')),
-        coins=data.get('coins'),
-        stars=data.get('stars'),
-        medal=data.get('medal'),
-        wins=data.get('wins'),
+        schedule='[]',
+        coins=0,
+        stars=0,
+        medal=0,
+        wins=0,
         tags=data.get('tags'),
-        isCaptain=data.get('isCaptain'),
-        isBackup=data.get('isBackup'),
-        riot=data.get('riot'),
-        steam=data.get('steam'),
-        epic=data.get('epic'),
-        xbox=data.get('xbox'),
-        psn=data.get('psn'),
-        score_cs=data.get('score_cs'),
-        score_valorant=data.get('score_valorant'),
-        score_lol = data.get('score_lol'),
-        score_rocketleague = data.get('score_rocketleague'),
-        score_fallguys = data.get('score_fallguys'),
+        isCaptain=0,
+        isBackup=0,
     )
 
     session = Session()
@@ -178,6 +168,7 @@ def update_player(idplayer):
 
     return jsonify({'message': 'Atualização realizada com sucesso'}), 200
 
+
 @player_blueprint.route('/player/schedule/<int:idplayer>', methods=['PUT'])
 @jwt_required()
 def update_player_schedule(idplayer):
@@ -196,6 +187,11 @@ def update_player_schedule(idplayer):
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'pictures')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@player_blueprint.route('/pictures/<path:filename>')
+def serve_image(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
+
 
 @player_blueprint.route('/player/picture/<int:idplayer>', methods=['PUT'])
 @jwt_required()
@@ -223,7 +219,7 @@ def update_player_picture(idplayer):
         file.save(file_path)
         player.photo = f"pictures/{new_filename}"
         session.commit()
-        return jsonify({'message': 'Foto atualizada com sucesso', 'photo': player.photo}), 200
+        return jsonify({'message': 'Foto atualizada com sucesso'}), 200
     except Exception as e:
         return jsonify({'message': 'Erro ao salvar o arquivo', 'error': str(e)}), 500
     finally:

@@ -49,7 +49,7 @@ def create_user():
     session = Session()
     session.add(new_user)
     session.commit()
-    return new_user.to_dict()
+    return jsonify({'message': 'Usuário criado'}), 200
 
 @user_blueprint.route('/checkpassword', methods=['POST'])
 def check_password():

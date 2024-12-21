@@ -189,7 +189,7 @@ class Player(Base):
     medal = Column(Integer)
     wins = Column(Integer)
     tags = Column(String(45))
-    photo = Column(String(150))
+    photo = Column(Text)
     isCaptain = Column(Integer)
     isBackup = Column(Integer)
     riot = Column(String(45))
