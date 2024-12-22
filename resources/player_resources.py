@@ -27,6 +27,20 @@ def get_player_by_id(idplayer):
     else:
         return jsonify({'message': 'Jogador não encontrado'}), 404
     
+@player_blueprint.route('/player/username/<string:username>', methods=['GET'])
+@jwt_required()
+def get_player_by_username(username):
+    session = Session()
+    
+    try:
+        player = session.query(Player).filter(Player.email.like(f"{username}.%")).first()
+        if player:
+            return jsonify(player.to_dict())
+        else:
+            return jsonify({'message': 'Jogador não encontrado'}), 404
+    finally:
+        session.close()
+
     
 @player_blueprint.route('/player/email/<string:email>', methods=['GET'])
 @jwt_required()
@@ -73,7 +87,7 @@ def create_player():
     try:
         session.add(new_player)
         session.commit()
-        session.refresh(new_player)  # Refresh na instancia para evitar erros
+        session.refresh(new_player)
         return jsonify({'message': 'Player criado com sucesso'}), 200
     except Exception as e:
         session.rollback()
@@ -158,6 +172,8 @@ def update_player(idplayer):
     player.nick = data.get('nick')
     player.twitch = data.get('twitch')
     player.email = data.get('email')
+    player.mobile = data.get('mobile')
+    player.favoriteGame = data.get('favoriteGame')
     player.riot = data.get('riot')
     player.steam = data.get('steam')
     player.epic = data.get('epic')

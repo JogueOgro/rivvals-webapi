@@ -178,7 +178,7 @@ class Match(Base):
 class Player(Base):
     __tablename__ = 'player'
 
-    idplayer = Column(Integer, primary_key=True, unique=True)
+    idplayer = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     name = Column(String(45), nullable=False)
     nick = Column(String(45))
     twitch = Column(String(45))
@@ -188,8 +188,22 @@ class Player(Base):
     stars = Column(String(45))
     medal = Column(Integer)
     wins = Column(Integer)
+    trophy = Column(Integer)
+    gold = Column(Integer)
+    silver = Column(Integer)
+    bronze = Column(Integer)
+    participations = Column(Integer)
     tags = Column(String(45))
     photo = Column(Text)
+    mobile = Column(String(45))
+    title = Column(String(45))
+    level = Column(String(45))
+    border = Column(String(45))
+    bestTeam = Column(String(45))
+    bestPlacement = Column(String(45))
+    favoriteGame = Column(String(45))
+    evaluations = Column(Integer)
+    achievments = Column(Integer)
     isCaptain = Column(Integer)
     isBackup = Column(Integer)
     riot = Column(String(45))
@@ -217,8 +231,24 @@ class Player(Base):
             'stars': self.stars,
             'medal': self.medal,
             'wins': self.wins,
+            'trophy': self.trophy,
+            'gold': self.gold,
+            'silver': self.silver,
+            'bronze': self.bronze,
+            'participations': self.participations,
             'tags': self.tags,
             'photo': self.photo,
+            'mobile': self.mobile,
+            'title': self.title,
+            'level': self.level,
+            'border': self.border,
+            'bestTeam': self.bestTeam,
+            'bestPlacement': self.bestPlacement,
+            'favoriteGame': self.favoriteGame,
+            'evaluations': self.evaluations,
+            'achievments': self.achievments,
+            'isCaptain': self.isCaptain,
+            'isBackup': self.isBackup,
             'riot': self.riot,
             'steam': self.steam,
             'epic': self.epic,
@@ -270,7 +300,6 @@ class User(Base):
           'iduser': self.iduser,
           'name': self.name,
           'email': self.email,
-          'password': self.password,  # Note: You might want to exclude this for security reasons
           'creation_date': self.creation_date,
           'auth': self.auth
       }
