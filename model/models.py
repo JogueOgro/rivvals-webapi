@@ -1,6 +1,7 @@
 # coding: utf-8
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
+from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
 import pytz
 
@@ -302,5 +303,25 @@ class User(Base):
           'email': self.email,
           'creation_date': self.creation_date,
           'auth': self.auth
+      }
+    
+class Notification(Base):
+    __tablename__ = 'notification'
+
+    idnotification = Column(Integer, primary_key=True)
+    player_idplayer = Column(Integer, nullable=False)
+    isRead = Column(Integer)
+    text = Column(Text)
+    link = Column(String(45))
+    created = Column(DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+      return {
+          'idnotification': self.idnotification,
+          'player_idplayer': self.player_idplayer,
+          'isRead': self.isRead,
+          'text': self.text,
+          'link': self.link,
+          'created': self.created
       }
 
